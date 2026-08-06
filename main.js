@@ -1,9 +1,12 @@
-document.addEventListener("DOMContentLoaded", function () {
+// Khởi chạy khi DOM đã sẵn sàng
+document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     loadComponent("header", "templates/tpl-header.html");
     loadComponent("footer", "templates/tpl-footer.html");
     routePageData();
 });
+
+// --- QUẢN LÝ GIAO DIỆN & TIỆN ÍCH --- //
 
 function initTheme() {
     const savedTheme = localStorage.getItem("hdv179_theme") || "default";
@@ -19,14 +22,29 @@ function loadComponent(elementId, filePath) {
     const targetEl = document.getElementById(elementId);
     if (!targetEl) return;
     fetch(filePath)
-        .then((res) => res.text())
-        .then((html) => { targetEl.innerHTML = html; })
-        .catch((err) => console.error(err));
+        .then(res => res.text())
+        .then(html => { targetEl.innerHTML = html; })
+        .catch(err => console.error(err));
 }
 
 function getUrlParam(param) {
     return new URLSearchParams(window.location.search).get(param);
 }
+
+// Tạo HTML thẻ bài viết dùng chung
+function createCardItemHTML(item) {
+    return `
+        <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
+            <img src="${item.thumb || 'assets/images/default.png'}" style="width:36px; height:36px; object-fit:cover; border:1px solid var(--border-color);">
+            <div style="flex:1; overflow:hidden;">
+                <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title}</a>
+                <div style="font-size:10px; color:#555;">📱 ${item.screen} | 👤 ${item.vendor}</div>
+            </div>
+        </div>
+    `;
+}
+
+// --- BỘ ĐIỀU HƯỚNG VÀ RENDER NỘI DUNG --- //
 
 function routePageData() {
     const path = window.location.pathname;
@@ -53,50 +71,21 @@ function routePageData() {
     }
 }
 
-function renderSearchResults(query) {
-    const listContainer = document.getElementById('post-list');
-    const paginationContainer = document.getElementById('pagination');
-    if (!listContainer) return;
+// Render trang chủ (phần danh mục rút gọn)
+function renderHomeSection(cat, containerId, limit = 4) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-    if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
-
-    const categories = ['gameloft', 'teamobi', 'ungdung', 'online', 'offline'];
-    
-    Promise.all(
-        categories.map(cat => 
-            fetch(`data/index/${cat}.json`)
-                .then(res => res.ok ? res.json() : [])
-                .catch(() => [])
-        )
-    ).then(results => {
-        const allItems = results.flat();
-        const matchedItems = allItems.filter(item => 
-            item.title.toLowerCase().includes(query) || 
-            (item.vendor && item.vendor.toLowerCase().includes(query))
-        );
-
-        if (matchedItems.length === 0) {
-            listContainer.innerHTML = `<div class="wap-card">Không tìm thấy kết quả cho "<b>${query}</b>".</div>`;
-            return;
-        }
-
-        let html = `<div style="font-size:10px; padding:3px; color:#555;">Tìm thấy <b>${matchedItems.length}</b> kết quả:</div>`;
-        matchedItems.forEach(item => {
-            html += `
-                <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
-                    <img src="${item.thumb || 'assets/images/default.png'}" style="width:40px; height:40px; object-fit:cover; border:1px solid var(--border-color);">
-                    <div style="flex:1;">
-                        <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title}</a>
-                        <div style="font-size:10px; color:#555;">📱 ${item.screen} | 👤 ${item.vendor}</div>
-                    </div>
-                </div>
-            `;
-        });
-        listContainer.innerHTML = html;
-    });
+    fetch(`data/index/${cat}.json`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.length) return container.innerHTML = '<div class="wap-card">Đang cập nhật...</div>';
+            container.innerHTML = data.slice(0, limit).map(item => createCardItemHTML(item)).join('');
+        })
+        .catch(() => container.innerHTML = '<div class="wap-card">Chưa có dữ liệu.</div>');
 }
 
+// Render danh sách theo chuyên mục + Phân trang
 function renderListPage(cat, page = 1, perPage = 10) {
     const listContainer = document.getElementById('post-list');
     const paginationContainer = document.getElementById('pagination');
@@ -107,28 +96,14 @@ function renderListPage(cat, page = 1, perPage = 10) {
     fetch(`data/index/${cat}.json`)
         .then(res => res.json())
         .then(data => {
-            if (!data || data.length === 0) {
-                listContainer.innerHTML = '<div class="wap-card">Chưa có bài viết nào.</div>';
-                return;
-            }
+            if (!data || !data.length) return listContainer.innerHTML = '<div class="wap-card">Chưa có bài viết nào.</div>';
 
             const totalPages = Math.ceil(data.length / perPage);
             const pageData = data.slice((page - 1) * perPage, page * perPage);
 
-            let html = '';
-            pageData.forEach(item => {
-                html += `
-                    <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
-                        <img src="${item.thumb || 'assets/images/default.png'}" style="width:40px; height:40px; object-fit:cover; border:1px solid var(--border-color);">
-                        <div style="flex:1;">
-                            <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title}</a>
-                            <div style="font-size:10px; color:#555;">📱 ${item.screen} | 👤 ${item.vendor}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            listContainer.innerHTML = html;
+            listContainer.innerHTML = pageData.map(item => createCardItemHTML(item)).join('');
 
+            // Xử lý nút phân trang
             if (paginationContainer && totalPages > 1) {
                 let p2 = '<div style="text-align:center; margin:5px 0;">';
                 if (page > 1) p2 += `<a href="?cat=${cat}&page=${page - 1}" class="btn btn-secondary">« Trước</a> `;
@@ -137,11 +112,38 @@ function renderListPage(cat, page = 1, perPage = 10) {
                 paginationContainer.innerHTML = p2 + '</div>';
             }
         })
-        .catch(() => {
-            listContainer.innerHTML = '<div class="wap-card">Mục này chưa có dữ liệu.</div>';
-        });
+        .catch(() => listContainer.innerHTML = '<div class="wap-card">Mục này chưa có dữ liệu.</div>');
 }
 
+// Render kết quả tìm kiếm trên tất cả danh mục
+function renderSearchResults(query) {
+    const listContainer = document.getElementById('post-list');
+    const paginationContainer = document.getElementById('pagination');
+    if (!listContainer) return;
+
+    if (paginationContainer) paginationContainer.innerHTML = '';
+    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
+
+    const categories = ['gameloft', 'teamobi', 'ungdung', 'online', 'offline'];
+
+    Promise.all(
+        categories.map(cat => fetch(`data/index/${cat}.json`).then(res => res.ok ? res.json() : []).catch(() => []))
+    ).then(results => {
+        const matchedItems = results.flat().filter(item =>
+            item.title.toLowerCase().includes(query) || (item.vendor && item.vendor.toLowerCase().includes(query))
+        );
+
+        if (!matchedItems.length) {
+            return listContainer.innerHTML = `<div class="wap-card">Không tìm thấy kết quả cho "<b>${query}</b>".</div>`;
+        }
+
+        let html = `<div style="font-size:10px; padding:3px; color:#555;">Tìm thấy <b>${matchedItems.length}</b> kết quả:</div>`;
+        html += matchedItems.map(item => createCardItemHTML(item)).join('');
+        listContainer.innerHTML = html;
+    });
+}
+
+// Render chi tiết bài viết (Căn lề justify + Nút download tối ưu màu sắc)
 function renderDetailPage(id) {
     const detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
@@ -160,19 +162,21 @@ function renderDetailPage(id) {
                     </div>
             `;
 
+            // Đoạn văn bản (căn đều 2 lề) & hình ảnh
             if (item.blocks) {
                 item.blocks.forEach(b => {
-                    if (b.type === 'text') html += `<p style="margin:3px 0;">${b.value.replace(/\n/g, '<br>')}</p>`;
-                    if (b.type === 'image') html += `<div style="text-align:center; margin:4px 0;"><img src="${b.value}" style="max-width:100%; border:1px solid var(--border-color);">${b.caption ? `<div style="font-size:9px;"><i>${b.caption}</i></div>` : ''}</div>`;
+                    if (b.type === 'text') html += `<p style="margin:4px 0; text-align: justify; line-height: 1.4;">${b.value.replace(/\n/g, '<br>')}</p>`;
+                    if (b.type === 'image') html += `<div style="text-align:center; margin:6px 0;"><img src="${b.value}" style="max-width:100%; border:1px solid var(--border-color);">${b.caption ? `<div style="font-size:9px;"><i>${b.caption}</i></div>` : ''}</div>`;
                 });
             }
             html += `</div>`;
 
+            // Danh sách file tải về
             if (item.downloads) {
                 item.downloads.forEach(g => {
                     html += `<div class="title-head">📥 ${g.groupTitle.toUpperCase()}</div><div class="wap-card">`;
                     g.files.forEach(f => {
-                        html += `<a href="${f.url}" class="btn btn-block" style="text-align:left; margin:2px 0;" download>💾 ${f.label}</a>`;
+                        html += `<a href="${f.url}" class="btn-download" download>💾 ${f.label}</a>`;
                     });
                     html += `</div>`;
                 });
@@ -180,42 +184,10 @@ function renderDetailPage(id) {
 
             detailContainer.innerHTML = html;
         })
-        .catch(() => {
-            detailContainer.innerHTML = '<div class="wap-card" style="color:red;">❌ Bài viết không tồn tại!</div>';
-        });
+        .catch(() => detailContainer.innerHTML = '<div class="wap-card" style="color:red;">❌ Bài viết không tồn tại!</div>');
 }
 
-function renderHomeSection(cat, containerId, limit = 4) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    fetch(`data/index/${cat}.json`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || data.length === 0) {
-                container.innerHTML = '<div class="wap-card">Đang cập nhật...</div>';
-                return;
-            }
-
-            const items = data.slice(0, limit);
-            let html = '';
-            items.forEach(item => {
-                html += `
-                    <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
-                        <img src="${item.thumb || 'assets/images/default.png'}" style="width:36px; height:36px; object-fit:cover; border:1px solid var(--border-color);">
-                        <div style="flex:1; overflow:hidden;">
-                            <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title}</a>
-                            <div style="font-size:10px; color:#555;">📱 ${item.screen} | 👤 ${item.vendor}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        })
-        .catch(() => {
-            container.innerHTML = '<div class="wap-card">Chưa có dữ liệu.</div>';
-        });
-}
+// --- TIỆN ÍCH UPLOAD GITHUB (ADMIN) --- //
 
 async function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
     const token = document.getElementById('gh-token').value.trim();
