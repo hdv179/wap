@@ -21,7 +21,8 @@ function setTheme(themeName) {
 function loadComponent(elementId, filePath) {
     const targetEl = document.getElementById(elementId);
     if (!targetEl) return;
-    fetch(filePath)
+    // Bổ sung query v= timestamp để tránh cache template HTML
+    fetch(`${filePath}?v=${Date.now()}`)
         .then(res => res.text())
         .then(html => { targetEl.innerHTML = html; })
         .catch(err => console.error(err));
@@ -37,8 +38,8 @@ function createCardItemHTML(item) {
         <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
             <img src="${item.thumb || 'assets/images/default.png'}" style="width:36px; height:36px; object-fit:cover; border:1px solid var(--border-color);">
             <div style="flex:1; overflow:hidden;">
-                <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title}</a>
-                <div style="font-size:10px; color:#555;">📱 ${item.screen} | 👤 ${item.vendor}</div>
+                <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title || 'Không có tiêu đề'}</a>
+                <div style="font-size:10px; color:#555;">📱 ${item.screen || 'N/A'} | 👤 ${item.vendor || 'N/A'}</div>
             </div>
         </div>
     `;
@@ -47,14 +48,16 @@ function createCardItemHTML(item) {
 // --- BỘ ĐIỀU HƯỚNG VÀ RENDER NỘI DUNG --- //
 
 function routePageData() {
-    const path = window.location.pathname;
     const cat = getUrlParam('cat') || 'gameloft';
     const id = getUrlParam('id');
     const query = getUrlParam('q');
 
-    if (path.includes('detail.html') && id) {
+    // 1. Kiểm tra trang Chi tiết
+    if (document.getElementById('post-detail') && id) {
         renderDetailPage(id);
-    } else if (path.includes('category.html')) {
+    } 
+    // 2. Kiểm tra trang Danh mục / Tìm kiếm (Tương thích cả GitHub Pages & Cloudflare Pages)
+    else if (document.getElementById('post-list')) {
         const catTitle = document.getElementById('category-title');
         if (query) {
             if (catTitle) catTitle.innerText = `TÌM KIẾM: "${query.toUpperCase()}"`;
@@ -64,8 +67,9 @@ function routePageData() {
             if (catTitle) catTitle.innerText = `DANH MỤC: ${cat.toUpperCase()}`;
             renderListPage(cat, page);
         }
-    } else if (document.getElementById('home-gameloft')) {
-        // Render tự động tất cả các danh mục ở trang chủ
+    } 
+    // 3. Kiểm tra Trang chủ
+    else if (document.getElementById('home-gameloft')) {
         const homeCategories = [
             'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
             'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
@@ -83,7 +87,8 @@ function renderHomeSection(cat, containerId, limit = 4) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    fetch(`data/index/${cat}.json`)
+    // Chống cache JSON bằng ?v=timestamp
+    fetch(`data/index/${cat}.json?v=${Date.now()}`)
         .then(res => res.json())
         .then(data => {
             if (!data || !data.length) return container.innerHTML = '<div class="wap-card">Đang cập nhật...</div>';
@@ -100,7 +105,8 @@ function renderListPage(cat, page = 1, perPage = 10) {
 
     listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
 
-    fetch(`data/index/${cat}.json`)
+    // Chống cache JSON bằng ?v=timestamp
+    fetch(`data/index/${cat}.json?v=${Date.now()}`)
         .then(res => res.json())
         .then(data => {
             if (!data || !data.length) return listContainer.innerHTML = '<div class="wap-card">Chưa có bài viết nào.</div>';
@@ -131,7 +137,6 @@ function renderSearchResults(query) {
     if (paginationContainer) paginationContainer.innerHTML = '';
     listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
 
-    // Danh sách đầy đủ các chuyên mục để thực hiện tìm kiếm toàn trang
     const categories = [
         'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
         'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
@@ -139,10 +144,10 @@ function renderSearchResults(query) {
     ];
 
     Promise.all(
-        categories.map(cat => fetch(`data/index/${cat}.json`).then(res => res.ok ? res.json() : []).catch(() => []))
+        categories.map(cat => fetch(`data/index/${cat}.json?v=${Date.now()}`).then(res => res.ok ? res.json() : []).catch(() => []))
     ).then(results => {
         const matchedItems = results.flat().filter(item =>
-            item.title.toLowerCase().includes(query) || (item.vendor && item.vendor.toLowerCase().includes(query))
+            item.title?.toLowerCase().includes(query) || item.vendor?.toLowerCase().includes(query)
         );
 
         if (!matchedItems.length) {
@@ -155,26 +160,27 @@ function renderSearchResults(query) {
     });
 }
 
-// Render chi tiết bài viết (Căn lề justify + Nút download tối ưu màu sắc)
+// Render chi tiết bài viết
 function renderDetailPage(id) {
     const detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
 
     detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
 
-    fetch(`data/items/${id}.json`)
+    // Chống cache JSON bằng ?v=timestamp
+    fetch(`data/items/${id}.json?v=${Date.now()}`)
         .then(res => res.json())
         .then(item => {
             let html = `
-                <div class="title-head">${item.title.toUpperCase()}</div>
+                <div class="title-head">${(item.title || '').toUpperCase()}</div>
                 <div class="wap-card">
                     <div style="font-size:10px; margin-bottom:5px; border-bottom:1px dashed var(--border-color); padding-bottom:3px;">
-                        📌 <b>Hãng:</b> ${item.vendor} | 🖥️ <b>Màn hình:</b> ${item.screen}<br>
-                        🏷️ <b>Phiên bản:</b> ${item.version} | 📅 <b>Cập nhật:</b> ${item.date}
+                        📌 <b>Hãng:</b> ${item.vendor || 'N/A'} | 🖥️ <b>Màn hình:</b> ${item.screen || 'N/A'}<br>
+                        🏷️ <b>Phiên bản:</b> ${item.version || '1.0'} | 📅 <b>Cập nhật:</b> ${item.date || 'N/A'}
                     </div>
             `;
 
-            // Đoạn văn bản (căn đều 2 lề) & hình ảnh
+            // Đoạn văn bản & hình ảnh
             if (item.blocks) {
                 item.blocks.forEach(b => {
                     if (b.type === 'text') html += `<p style="margin:4px 0; text-align: justify; line-height: 1.4;">${b.value.replace(/\n/g, '<br>')}</p>`;
@@ -186,7 +192,7 @@ function renderDetailPage(id) {
             // Danh sách file tải về
             if (item.downloads) {
                 item.downloads.forEach(g => {
-                    html += `<div class="title-head">📥 ${g.groupTitle.toUpperCase()}</div><div class="wap-card">`;
+                    html += `<div class="title-head">📥 ${(g.groupTitle || '').toUpperCase()}</div><div class="wap-card">`;
                     g.files.forEach(f => {
                         html += `<a href="${f.url}" class="btn-download" download>💾 ${f.label}</a>`;
                     });
@@ -212,7 +218,7 @@ async function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl
     if (!baseName) return alert('Vui lòng nhập ID bài viết hoặc Tên file!');
 
     baseName = baseName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
-    const ext = fileObj.name.split('.').pop();
+    const ext = fileObj.name.split('.').pop().toLowerCase();
     const fileName = `${baseName}-${Date.now()}.${ext}`;
     const fullPath = `${folderPath}/${fileName}`;
     const apiUrl = `https://api.github.com/repos/${repo}/contents/${fullPath}`;
