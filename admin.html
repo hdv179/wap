@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Builder - HDV179 WAP</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div id="header"></div>
+
+    <div style="padding: 2px;">
+        <div class="title-head">⚙️ CẤU HÌNH GITHUB API</div>
+        <div class="wap-card">
+            <div class="form-group">
+                <label>GitHub Personal Access Token:</label>
+                <input type="password" id="gh-token" class="form-control" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>Đường Dẫn Repo (username/repository):</label>
+                <input type="text" id="gh-repo" class="form-control" placeholder="username/hdv179-wap">
+            </div>
+            <button type="button" class="btn btn-secondary btn-block" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
+        </div>
+
+        <form id="builder-form">
+            <div class="title-head">THÔNG TIN BÀI VIẾT</div>
+            <div class="wap-card">
+                <div class="form-group">
+                    <label>Chuyên Mục Target:</label>
+                    <select id="game-category" class="form-control">
+                        <option value="gameloft">Game Gameloft</option>
+                        <option value="teamobi">Game TeaMobi & Mod</option>
+                        <option value="online">Game Online</option>
+                        <option value="offline">Game Offline</option>
+                        <option value="ungdung">Ứng Dụng</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mã Định Danh (ID bài viết):</label>
+                    <input type="text" id="game-id" class="form-control" placeholder="avatar-250" required>
+                </div>
+                <div class="form-group">
+                    <label>Tiêu Đề Bài Viết / Tên Game:</label>
+                    <input type="text" id="game-title" class="form-control" placeholder="Avatar 250 Auto Farm" required>
+                </div>
+                <div class="form-group">
+                    <label>Nhà Phát Triển / Tác Giả:</label>
+                    <input type="text" id="game-vendor" class="form-control" placeholder="TeaMobi">
+                </div>
+                <div class="form-group">
+                    <label>Màn Hình & Phiên Bản:</label>
+                    <div style="display: flex; gap: 3px;">
+                        <input type="text" id="game-screen" class="form-control" placeholder="240x320" value="Multi screen">
+                        <input type="text" id="game-version" class="form-control" placeholder="v2.5.0" value="1.0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="title-head">NỘI DUNG & HÌNH ẢNH</div>
+            <div class="wap-card">
+                <div id="blocks-container"></div>
+                <div style="display: flex; gap: 3px; margin-top: 4px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="addContentBlock('text')">+ Đoạn Văn</button>
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="addContentBlock('image')">+ Ảnh Minh Họa</button>
+                </div>
+            </div>
+
+            <div class="title-head">KHỐI FILE TẢI VỀ</div>
+            <div class="wap-card">
+                <div id="dl-groups-container"></div>
+                <button type="button" class="btn btn-secondary btn-block" style="margin-top:4px;" onclick="addDownloadGroup()">+ Thêm Khối Tải Về</button>
+            </div>
+
+            <button type="submit" class="btn btn-block" style="margin: 8px 0; padding: 6px;">🚀 ĐĂNG BÀI LÊN GITHUB</button>
+        </form>
+
+        <div id="status-msg"></div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+        window.onload = function() {
+            if (localStorage.getItem('hdv179_gh_token')) document.getElementById('gh-token').value = localStorage.getItem('hdv179_gh_token');
+            if (localStorage.getItem('hdv179_gh_repo')) document.getElementById('gh-repo').value = localStorage.getItem('hdv179_gh_repo');
+            addContentBlock('text');
+            addDownloadGroup();
+        };
+
+        function saveConfig() {
+            localStorage.setItem('hdv179_gh_token', document.getElementById('gh-token').value.trim());
+            localStorage.setItem('hdv179_gh_repo', document.getElementById('gh-repo').value.trim());
+            alert('Đã lưu cấu hình!');
+        }
+
+        function addContentBlock(type, val = '', caption = '') {
+            const container = document.getElementById('blocks-container');
+            const div = document.createElement('div');
+            div.className = 'wap-card content-block-item';
+            div.dataset.type = type;
+
+            if (type === 'text') {
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <strong>📝 Đoạn Văn</strong>
+                        <button type="button" class="btn btn-danger" onclick="this.closest('.content-block-item').remove()">Xóa</button>
+                    </div>
+                    <textarea class="form-control block-val" rows="3">${val}</textarea>
+                `;
+            } else if (type === 'image') {
+                const uid = 'img-' + Date.now();
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <strong>🖼️ Ảnh Minh Họa</strong>
+                        <button type="button" class="btn btn-danger" onclick="this.closest('.content-block-item').remove()">Xóa</button>
+                    </div>
+                    <div class="upload-box">
+                        <input type="text" class="form-control block-val" id="${uid}-input" placeholder="assets/images/..." value="${val}">
+                        <input type="file" id="${uid}-file" class="file-input-hidden" accept="image/*" onchange="uploadToGitHub(this.files[0], 'assets/images', '', document.getElementById('${uid}-input'))">
+                        <button type="button" class="btn btn-upload" onclick="document.getElementById('${uid}-file').click()">📤 Upload</button>
+                    </div>
+                    <input type="text" class="form-control block-caption" placeholder="Chú thích ảnh" value="${caption}" style="margin-top:2px;">
+                `;
+            }
+            container.appendChild(div);
+        }
+
+        let groupCounter = 0;
+        function addDownloadGroup(title = '', files = []) {
+            groupCounter++;
+            const container = document.getElementById('dl-groups-container');
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'wap-card dl-group-item';
+            const gId = `dl-files-${groupCounter}`;
+
+            groupDiv.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                    <strong style="color:var(--primary-main);">Khối File #${groupCounter}</strong>
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.dl-group-item').remove()">Xóa Khối</button>
+                </div>
+                <input type="text" class="form-control group-title" placeholder="Tiêu đề khối" value="${title}" style="margin-bottom:3px;">
+                <div id="${gId}"></div>
+                <button type="button" class="btn btn-secondary" style="margin-top:2px;" onclick="addFileRow('${gId}')">+ Thêm File</button>
+            `;
+            container.appendChild(groupDiv);
+            addFileRow(gId);
+        }
+
+        function addFileRow(groupId, label = '', url = '') {
+            const container = document.getElementById(groupId);
+            const row = document.createElement('div');
+            const uid = 'file-' + Date.now() + Math.random().toString(36).substr(2, 3);
+            row.className = 'file-row';
+            row.style.marginBottom = '4px';
+            row.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; gap:2px;">
+                        <input type="text" class="form-control file-label" placeholder="Tên hiển thị (.JAR)" value="${label}" style="flex:1;">
+                        <input type="text" class="form-control custom-file-name" id="${uid}-custom" placeholder="Tên upload tùy chọn" style="flex:1;">
+                    </div>
+                    <div class="upload-box">
+                        <input type="text" class="form-control file-url" id="${uid}-input" placeholder="assets/files/..." value="${url}" style="flex:1;">
+                        <input type="file" id="${uid}-file" class="file-input-hidden" onchange="uploadToGitHub(this.files[0], 'assets/files', document.getElementById('${uid}-custom').value, document.getElementById('${uid}-input'))">
+                        <button type="button" class="btn btn-upload" onclick="document.getElementById('${uid}-file').click()">📤 Upload</button>
+                        <button type="button" class="btn btn-danger" onclick="this.closest('.file-row').remove()">X</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function showStatus(text, type) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = text;
+            msg.className = `status-msg ${type}`;
+        }
+
+        document.getElementById('builder-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const token = document.getElementById('gh-token').value.trim();
+            const repo = document.getElementById('gh-repo').value.trim();
+            const category = document.getElementById('game-category').value;
+            const itemId = document.getElementById('game-id').value.trim();
+            const title = document.getElementById('game-title').value.trim();
+
+            if (!token || !repo) return showStatus('Thiếu Token hoặc Repo!', 'error');
+
+            showStatus('Đang đăng bài lên GitHub...', 'success');
+
+            const blocks = [];
+            let thumbUrl = '';
+            document.querySelectorAll('.content-block-item').forEach(el => {
+                const type = el.dataset.type;
+                const val = el.querySelector('.block-val').value.trim();
+                if (val !== '') {
+                    if (type === 'text') blocks.push({ type: 'text', value: val });
+                    if (type === 'image') {
+                        blocks.push({ type: 'image', value: val, caption: el.querySelector('.block-caption').value.trim() });
+                        if (!thumbUrl) thumbUrl = val;
+                    }
+                }
+            });
+
+            const downloads = [];
+            document.querySelectorAll('.dl-group-item').forEach(groupEl => {
+                const groupTitle = groupEl.querySelector('.group-title').value.trim();
+                const files = [];
+                groupEl.querySelectorAll('.file-row').forEach(fRow => {
+                    const l = fRow.querySelector('.file-label').value.trim();
+                    const u = fRow.querySelector('.file-url').value.trim();
+                    if (l !== '' && u !== '') files.push({ label: l, url: u });
+                });
+                if (files.length > 0) downloads.push({ groupTitle: groupTitle || 'DOWNLOAD', files: files });
+            });
+
+            const fullDetailObj = {
+                id: itemId, title: title, vendor: document.getElementById('game-vendor').value.trim(),
+                category: category, screen: document.getElementById('game-screen').value.trim(),
+                version: document.getElementById('game-version').value.trim(),
+                date: new Date().toLocaleDateString('vi-VN'), blocks: blocks, downloads: downloads
+            };
+
+            const indexSummaryObj = {
+                id: itemId, title: title, vendor: fullDetailObj.vendor,
+                screen: fullDetailObj.screen, thumb: thumbUrl
+            };
+
+            try {
+                const itemPath = `data/items/${itemId}.json`;
+                const itemUrl = `https://api.github.com/repos/${repo}/contents/${itemPath}`;
+                let itemSha = null;
+                const itemCheck = await fetch(itemUrl, { headers: { 'Authorization': `token ${token}` } });
+                if (itemCheck.ok) { const d = await itemCheck.json(); itemSha = d.sha; }
+
+                await fetch(itemUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `WAP Detail: ${itemId}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(fullDetailObj, null, 2)))),
+                        sha: itemSha
+                    })
+                });
+
+                const indexPath = `data/index/${category}.json`;
+                const indexUrl = `https://api.github.com/repos/${repo}/contents/${indexPath}`;
+                let indexItems = [];
+                let indexSha = null;
+                const indexCheck = await fetch(indexUrl, { headers: { 'Authorization': `token ${token}` } });
+                if (indexCheck.ok) {
+                    const d = await indexCheck.json();
+                    indexSha = d.sha;
+                    indexItems = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+                }
+
+                indexItems = indexItems.filter(i => i.id !== itemId);
+                indexItems.unshift(indexSummaryObj);
+
+                await fetch(indexUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `WAP Index: ${category}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(indexItems, null, 2)))),
+                        sha: indexSha
+                    })
+                });
+
+                showStatus('🎉 Đã đăng bài và cập nhật chỉ mục thành công!', 'success');
+            } catch (err) {
+                showStatus(`Thất bại: ${err.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
