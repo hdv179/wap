@@ -1,3 +1,3 @@
-# HDV179 WAP PORTAL
+# HDV179 WAP
 
-WAP Portal nhẹ, phẳng chuẩn phong cách 2005-2010 dành cho game/ứng dụng Java.
+WAP phong cách 2005-2010 dành cho game/ứng dụng Java.
