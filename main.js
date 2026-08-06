@@ -65,9 +65,16 @@ function routePageData() {
             renderListPage(cat, page);
         }
     } else if (document.getElementById('home-gameloft')) {
-        renderHomeSection('gameloft', 'home-gameloft', 4);
-        renderHomeSection('teamobi', 'home-teamobi', 4);
-        renderHomeSection('ungdung', 'home-ungdung', 4);
+        // Render tự động tất cả các danh mục ở trang chủ
+        const homeCategories = [
+            'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
+            'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
+            'nhacchuong', 'chude', 'doctruyen', 'thuthuat'
+        ];
+        
+        homeCategories.forEach(catName => {
+            renderHomeSection(catName, `home-${catName}`, 4);
+        });
     }
 }
 
@@ -124,7 +131,12 @@ function renderSearchResults(query) {
     if (paginationContainer) paginationContainer.innerHTML = '';
     listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
 
-    const categories = ['gameloft', 'teamobi', 'ungdung', 'online', 'offline'];
+    // Danh sách đầy đủ các chuyên mục để thực hiện tìm kiếm toàn trang
+    const categories = [
+        'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
+        'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
+        'nhacchuong', 'chude', 'doctruyen', 'thuthuat'
+    ];
 
     Promise.all(
         categories.map(cat => fetch(`data/index/${cat}.json`).then(res => res.ok ? res.json() : []).catch(() => []))
