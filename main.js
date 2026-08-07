@@ -294,7 +294,6 @@ function routePageData() {
     var detailContainer = document.getElementById('post-detail');
     var catTitle = document.getElementById('category-title');
 
-    /* Tự động ưu tiên xử lý tìm kiếm nếu có tham số query (q) trong URL */
     if (query && query.trim() !== '') {
         if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
         renderSearchResults(query.trim());
@@ -382,7 +381,6 @@ function renderSearchResults(query) {
     var listContainer = document.getElementById('post-list');
     var paginationContainer = document.getElementById('pagination');
 
-    /* Nếu đang ở trang chủ không có container post-list, tạo nhanh vùng hiển thị */
     if (!listContainer) {
         var mainWrapper = document.getElementById('main-content') || document.body;
         var searchBox = document.createElement('div');
@@ -416,8 +414,8 @@ function renderSearchResults(query) {
         var currentCat = ALL_CATEGORIES[categoryIndex];
         categoryIndex++;
 
-        fetchJson('data/index/' + currentCat + '.json', function (data) {
-            if (data && data.length) {
+        fetchJson('data/index/' + currentCat + '.json', function (data, err) {
+            if (!err && data && data.length) {
                 for (var j = 0; j < data.length; j++) {
                     var item = data[j];
                     if (!item) continue;
@@ -443,7 +441,7 @@ function renderSearchResults(query) {
                     }
                 }
             }
-            processNextCategory();
+            processNextCategory(); // Đảm bảo luôn chuyển sang danh mục tiếp theo dù có lỗi JSON hay không
         });
     }
 
@@ -584,7 +582,8 @@ function handleGlobalLinks(e) {
         }
 
         var cleanedUrl = stripHtmlExtension(href);
-        if (cleanedUrl !== href) {
+        // Kiểm tra tránh chuyển hướng nếu đường dẫn rỗng hoặc đã trỏ đúng trang hiện tại
+        if (cleanedUrl && cleanedUrl !== href && cleanedUrl !== window.location.pathname) {
             if (e.preventDefault) {
                 e.preventDefault();
             } else {
