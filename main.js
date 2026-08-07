@@ -19,7 +19,11 @@ function parseJson(text) {
     if (window.JSON && typeof window.JSON.parse === 'function') {
         return window.JSON.parse(text);
     }
-    return (new Function('return ' + text))();
+    try {
+        return (new Function('return ' + text))();
+    } catch (e) {
+        return null;
+    }
 }
 
 /* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
@@ -27,7 +31,10 @@ function stringifyJson(obj) {
     if (window.JSON && typeof window.JSON.stringify === 'function') {
         return window.JSON.stringify(obj);
     }
-    return '{"message":"' + (obj.message || '').replace(/"/g, '\\"') + '","content":"' + (obj.content || '') + '"}';
+    var msg = (obj.message || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    var content = (obj.content || '');
+    var sha = obj.sha ? ',"sha":"' + obj.sha + '"' : '';
+    return '{"message":"' + msg + '","content":"' + content + '"' + sha + '}';
 }
 
 /* ==========================================================================
@@ -130,12 +137,12 @@ function fetchJson(url, callback) {
     }
 
     loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
-        try {
-            var data = parseJson(text);
+        var data = parseJson(text);
+        if (data) {
             JSON_CACHE[url] = data;
             if (callback) callback(data);
-        } catch (e) {
-            if (callback) callback(null, e);
+        } else {
+            if (callback) callback(null, 'JSON Parse Error');
         }
     }, function (err) {
         if (callback) callback(null, err);
@@ -212,7 +219,7 @@ function createCardItemHTML(item) {
         '<img src="' + thumb + '" alt="' + title + '" class="wap-card__thumb">' +
         '<div class="wap-card__content">' +
         '<a href="detail.html?id=' + id + '" class="wap-card__title">' + title + '</a>' +
-        '<div class="wap-card__meta">📱 ' + screen + ' | 👤 ' + vendor + '</div>' +
+        '<div class="wap-card__meta">Màn hình: ' + screen + ' | Hãng: ' + vendor + '</div>' +
         '</div></div>';
 }
 
@@ -255,7 +262,7 @@ function renderHomeSection(cat, containerId, limit) {
     var container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
+    container.innerHTML = '<div class="wap-card">Đang tải...</div>';
     fetchJson('data/index/' + cat + '.json', function (data, err) {
         if (err || !data || !data.length) {
             container.innerHTML = createFallbackItemsHTML();
@@ -276,7 +283,7 @@ function renderListPage(cat, page, perPage) {
     var paginationContainer = document.getElementById('pagination');
     if (!listContainer) return;
 
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Đang tải danh sách...</div>';
     page = page || 1;
     perPage = perPage || 10;
 
@@ -311,7 +318,7 @@ function renderSearchResults(query) {
     if (!listContainer) return;
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Đang tìm kiếm...</div>';
 
     var results = [];
     var pending = ALL_CATEGORIES.length;
@@ -320,7 +327,7 @@ function renderSearchResults(query) {
         if (pending > 0) return;
 
         if (!results.length) {
-            listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả cho "<b>' + query + '</b>".</div>';
+            listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả cho "<b>' + escapeHtml(query) + '</b>".</div>';
             return;
         }
 
@@ -353,11 +360,11 @@ function renderDetailPage(id) {
     var detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
 
-    detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
+    detailContainer.innerHTML = '<div class="wap-card">Đang tải bài viết...</div>';
 
     fetchJson('data/items/' + id + '.json', function (item, err) {
         if (err || !item) {
-            detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>';
+            detailContainer.innerHTML = '<div class="wap-card wap-card--error">Bài viết không tồn tại!</div>';
             return;
         }
 
@@ -369,7 +376,7 @@ function renderDetailPage(id) {
 
         var html = '<div class="title-head">' + title + '</div>' +
             '<div class="wap-card">' +
-            '<div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
+            '<div class="detail-meta"><b>Hãng:</b> ' + vendor + ' | <b>Màn hình:</b> ' + screen + '<br><b>Phiên bản:</b> ' + version + ' | <b>Cập nhật:</b> ' + date + '</div>';
 
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
@@ -390,10 +397,10 @@ function renderDetailPage(id) {
         if (item.downloads) {
             for (var j = 0; j < item.downloads.length; j++) {
                 var group = item.downloads[j];
-                html += '<div class="title-head">📥 ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
+                html += '<div class="title-head">📥 ' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card">';
                 for (var k = 0; k < group.files.length; k++) {
                     var fileItem = group.files[k];
-                    html += '<a href="' + fileItem.url + '" class="btn-download" download>💾 ' + fileItem.label + '</a>';
+                    html += '<a href="' + escapeHtml(fileItem.url) + '" class="btn-download" download>💾 ' + escapeHtml(fileItem.label) + '</a>';
                 }
                 html += '</div>';
             }
@@ -453,7 +460,7 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
                     alert('Thành công: ' + fullPath);
                 } else {
                     if (targetInputEl) targetInputEl.value = '';
-                    alert('Lỗi upload file!');
+                    alert('Lỗi upload file (Mã lỗi: ' + xhr.status + ')!');
                 }
             }
         };
