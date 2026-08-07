@@ -1,0 +1,50 @@
+{
+  "id": "ucbrowser",
+  "title": "UC Browser",
+  "vendor": "UcWeb",
+  "category": "trinhduyet",
+  "screen": "Multi screen",
+  "version": "9.5",
+  "date": "7/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "UC Browser mang đến trải nghiệm lướt web nhanh và mượt mà. Ứng dụng cung cấp các cấu hình truy cập linh hoạt dựa trên chất lượng kết nối mạng, giúp bạn dễ dàng điều chỉnh việc duyệt web theo sở thích cá nhân, tiết kiệm chi phí dữ liệu và tăng tốc độ tải trang nhờ công nghệ nén dữ liệu mạnh mẽ."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/ucbrowser_1786078434303.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Tính năng AutoPager mang lại trải nghiệm đọc liền mạch bằng cách tự động tải trang tiếp theo khi bạn lướt đến cuối trang hiện tại. Công nghệ này được tối ưu riêng cho phiên bản di động của các nền tảng lớn như Google, Twitter, Facebook..."
+    },
+    {
+      "type": "text",
+      "value": "Trình duyệt cũng tối ưu hóa Chế độ tăng tốc: tùy thuộc vào tốc độ mạng, UC Browser sẽ tự động tải phiên bản website phù hợp nhất. Tính năng Tăng tốc Download giúp cải thiện kết nối mạng, từ đó nhân đôi tốc độ tải tệp về máy."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/ucbrowser_1786078438892.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Bên cạnh đó, UC Browser cho phép bạn dễ dàng tải các hình ảnh yêu thích từ Facebook về điện thoại và hỗ trợ đa ngôn ngữ. Với trình quản lý tải xuống vượt trội, đây được coi là một trong những ứng dụng hỗ trợ tải file tốt nhất trên di động."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "UC Browser",
+          "url": "assets/files/UCBrowser_Multi_s40_1786078474033.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
