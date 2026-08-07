@@ -1,0 +1,40 @@
+{
+  "id": "avatarplus",
+  "title": "Avatar Plus",
+  "vendor": "TeaMobi",
+  "category": "teamobi",
+  "screen": "Multi Screen",
+  "version": "2.5.0",
+  "date": "7/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Avatar là trò chơi mạng xã hội trên điện thoại di động thu hút số lượng cư dân đông đảo và năng động. Khi tham gia vào thành phố của game Avatar, người chơi như đang sống trong một thành phố ảo, được tự do thể hiện bản thân, kết bạn, bày tỏ tình cảm và tạo nhật ký cá nhân."
+    },
+    {
+      "type": "text",
+      "value": "Bên cạnh đó, Avatar còn thu hút thành viên nhờ chuỗi hoạt động phong phú như trò chuyện, kết bạn, làm nông trại, học tiếng Anh, câu cá và giải trí tích điểm thông qua các mini game dân gian (caro, cờ tướng...) hoặc tham gia các chương trình trúng thưởng hấp dẫn."
+    },
+    {
+      "type": "text",
+      "value": "Trong khu nông trại của Avatar Online, người chơi có thể chăm sóc các loại gia súc như heo, bò, gà, và nuôi chó để trông giữ nông trại. Bạn có thể mở rộng ô đất để trồng thêm nông sản. Thu hoạch gà để lấy trứng và thịt, bò cung cấp sữa và thịt, còn heo có thể xuất chuồng sau 2 ngày chăm sóc."
+    },
+    {
+      "type": "text",
+      "value": "Ngoài ra, nhân vật của bạn sẽ trở nên lộng lẫy hơn khi sở hữu những bộ trang phục đẹp mắt. Hãy tham gia xây dựng cộng đồng lớn trên di động để thỏa thích mua sắm, hẹn hò, chăn nuôi, đánh cờ và xây dựng nhà cửa theo ý thích."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Avartar Plus",
+          "url": "assets/files/AvatarPlus_Multi_s40_1786073409408.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
