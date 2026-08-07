@@ -18,7 +18,7 @@ if (!String.prototype.trim) {
 /* Helper xóa dấu tiếng Việt giúp tìm kiếm chính xác */
 function removeVietnameseTones(str) {
     if (!str) return '';
-    str = str.toLowerCase();
+    str = String(str).toLowerCase();
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
     str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
     str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
@@ -114,8 +114,13 @@ function getUrlParam(param) {
         var parts = pairs[i].split('=');
         if (parts[0] === param) {
             var val = parts[1] || '';
-            val = val.replace(/\+/g, ' '); // Xử lý khoảng trắng dạng dấu +
-            return decodeURIComponent(val);
+            // Giải mã khoảng trắng từ dấu '+' hoặc '%20'
+            val = val.replace(/\+/g, ' ');
+            try {
+                return decodeURIComponent(val);
+            } catch (e) {
+                return unescape(val);
+            }
         }
     }
     return '';
@@ -298,7 +303,7 @@ function routePageData() {
         renderDetailPage(id);
     } else if (document.getElementById('post-list')) {
         var catTitle = document.getElementById('category-title');
-        if (query) {
+        if (query && query.trim() !== '') {
             if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
             renderSearchResults(query.trim());
         } else {
@@ -377,36 +382,39 @@ function renderListPage(cat, page, perPage) {
     });
 }
 
+/* Tối ưu hóa hàm tìm kiếm: Đệ quy theo thứ tự (Sequential Queue) để tránh trôi biến & lỗi bất đồng bộ */
 function renderSearchResults(query) {
     var listContainer = document.getElementById('post-list');
     var paginationContainer = document.getElementById('pagination');
     if (!listContainer) return;
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
 
     var results = [];
-    var pending = ALL_CATEGORIES.length;
     var cleanQuery = removeVietnameseTones(query);
+    var categoryIndex = 0;
 
-    function checkDone() {
-        if (pending > 0) return;
+    function processNextCategory() {
+        if (categoryIndex >= ALL_CATEGORIES.length) {
+            // Hoàn tất quét toàn bộ danh mục
+            if (!results.length) {
+                listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả phù hợp cho "<b>' + escapeHtml(query) + '</b>".</div>';
+                return;
+            }
 
-        if (!results.length) {
-            listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả cho "<b>' + escapeHtml(query) + '</b>".</div>';
+            var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
+            for (var i = 0; i < results.length; i++) {
+                html += createCardItemHTML(results[i]);
+            }
+            listContainer.innerHTML = html;
             return;
         }
 
-        var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
-        for (var i = 0; i < results.length; i++) {
-            html += createCardItemHTML(results[i]);
-        }
-        listContainer.innerHTML = html;
-    }
+        var currentCat = ALL_CATEGORIES[categoryIndex];
+        categoryIndex++;
 
-    function searchCategory(catName) {
-        fetchJson('data/index/' + catName + '.json', function (data) {
-            pending--;
+        fetchJson('data/index/' + currentCat + '.json', function (data) {
             if (data && data.length) {
                 for (var j = 0; j < data.length; j++) {
                     var item = data[j];
@@ -416,12 +424,11 @@ function renderSearchResults(query) {
                     var vendor = removeVietnameseTones(item.vendor || '');
                     var id = removeVietnameseTones(item.id || '');
 
-                    // Tìm kiếm khớp chuỗi theo Tên, Hãng hoặc ID
                     if (title.indexOf(cleanQuery) !== -1 ||
                         vendor.indexOf(cleanQuery) !== -1 ||
                         id.indexOf(cleanQuery) !== -1) {
 
-                        // Lọc trùng lặp bài viết
+                        // Tránh thêm trùng id bài viết
                         var isDuplicate = false;
                         for (var k = 0; k < results.length; k++) {
                             if (results[k].id === item.id) {
@@ -435,13 +442,13 @@ function renderSearchResults(query) {
                     }
                 }
             }
-            checkDone();
+            // Gọi tiếp danh mục tiếp theo
+            processNextCategory();
         });
     }
 
-    for (var i = 0; i < ALL_CATEGORIES.length; i++) {
-        searchCategory(ALL_CATEGORIES[i]);
-    }
+    // Bắt đầu tìm kiếm từ danh mục đầu tiên
+    processNextCategory();
 }
 
 function renderDetailPage(id) {
