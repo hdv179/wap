@@ -7,6 +7,9 @@ var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
 
+// Tự động kiểm tra xem site có đang chạy trên Cloudflare Pages / Workers hay không
+var IS_CLOUDFLARE = (window.location.hostname.indexOf('pages.dev') !== -1 || window.location.hostname.indexOf('workers.dev') !== -1);
+
 /* Polyfill String.prototype.trim cho JS đời cũ */
 if (!String.prototype.trim) {
     String.prototype.trim = function () {
@@ -42,6 +45,13 @@ function removeVietnameseTones(str) {
     str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
     str = str.replace(/đ/g, "d");
     return str;
+}
+
+/* Helper xóa đuôi .html trên môi trường Cloudflare */
+function stripHtmlExtension(url) {
+    if (!url) return '';
+    // Chỉ xóa .html nếu đuôi nằm trước dấu ? (query string) hoặc ở cuối chuỗi
+    return url.replace(/\.html(\?|$)/, '$1');
 }
 
 /* ==========================================================================
@@ -81,7 +91,7 @@ function getUrlParam(param) {
         var parts = pairs[i].split('=');
         if (parts[0] === param) {
             var val = parts[1] || '';
-            // Chuyển dấu '+' thành khoảng trắng trước khi decode (sửa lỗi Opera/Java)
+            // Chuyển dấu '+' thành khoảng trắng trước khi decode
             val = val.replace(/\+/g, ' ');
             return decodeURIComponent(val);
         }
@@ -509,7 +519,7 @@ function handleGlobalLinks(e) {
     e = e || window.event;
     var target = e.target || e.srcElement;
 
-    // Tìm thẻ <a> gần nhất (phòng trường hợp bấm vào <img> hoặc <span> bên trong <a>)
+    // Tìm thẻ <a> gần nhất
     while (target && target.tagName !== 'A') {
         target = target.parentNode;
     }
@@ -540,4 +550,3 @@ if (document.addEventListener) {
 } else if (document.attachEvent) {
     document.attachEvent('onclick', handleGlobalLinks);
 }
-
