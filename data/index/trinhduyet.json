@@ -1,5 +1,12 @@
 [
   {
+    "id": "operamini",
+    "title": "Opera Mini",
+    "vendor": "Opera",
+    "screen": "Multi screen",
+    "thumb": "assets/images/operamini_1786079852250.png"
+  },
+  {
     "id": "ucbrowser",
     "title": "UC Browser",
     "vendor": "UcWeb",
