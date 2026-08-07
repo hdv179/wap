@@ -6,9 +6,7 @@ var ALL_CATEGORIES = HOME_CATEGORIES.slice(0);
 var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
-
-// Tự động kiểm tra xem site có đang chạy trên Cloudflare Pages / Workers hay không
-var IS_CLOUDFLARE = (window.location.hostname.indexOf('pages.dev') !== -1 || window.location.hostname.indexOf('workers.dev') !== -1);
+var IS_CLOUDFLARE = false; /* Cờ nhận diện Cloudflare */
 
 /* Polyfill String.prototype.trim cho JS đời cũ */
 if (!String.prototype.trim) {
@@ -17,23 +15,7 @@ if (!String.prototype.trim) {
     };
 }
 
-/* Helper ép kiểu JSON an toàn không phụ thuộc JSON.parse gốc */
-function parseJson(text) {
-    if (window.JSON && typeof window.JSON.parse === 'function') {
-        return window.JSON.parse(text);
-    }
-    return (new Function('return ' + text))();
-}
-
-/* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
-function stringifyJson(obj) {
-    if (window.JSON && typeof window.JSON.stringify === 'function') {
-        return window.JSON.stringify(obj);
-    }
-    return '{"message":"' + (obj.message || '').replace(/"/g, '\\"') + '","content":"' + (obj.content || '') + '"}';
-}
-
-/* Helper xóa dấu tiếng Việt giúp tìm kiếm không phụ thuộc vào dấu */
+/* Helper xóa dấu tiếng Việt giúp tìm kiếm chính xác */
 function removeVietnameseTones(str) {
     if (!str) return '';
     str = str.toLowerCase();
@@ -47,11 +29,52 @@ function removeVietnameseTones(str) {
     return str;
 }
 
-/* Helper xóa đuôi .html trên môi trường Cloudflare */
+/* Helper ép kiểu JSON an toàn không phụ thuộc JSON.parse gốc */
+function parseJson(text) {
+    if (window.JSON && typeof window.JSON.parse === 'function') {
+        return window.JSON.parse(text);
+    }
+    try {
+        return (new Function('return ' + text))();
+    } catch (e) {
+        return null;
+    }
+}
+
+/* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
+function stringifyJson(obj) {
+    if (window.JSON && typeof window.JSON.stringify === 'function') {
+        return window.JSON.stringify(obj);
+    }
+    var msg = (obj.message || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    var content = (obj.content || '');
+    var sha = obj.sha ? ',"sha":"' + obj.sha + '"' : '';
+    return '{"message":"' + msg + '","content":"' + content + '"' + sha + '}';
+}
+
+/* Helper thực hiện cắt đuôi .html và index.html */
 function stripHtmlExtension(url) {
     if (!url) return '';
-    // Chỉ xóa .html nếu đuôi nằm trước dấu ? (query string) hoặc ở cuối chuỗi
-    return url.replace(/\.html(\?|$)/, '$1');
+    var parts = url.split('?');
+    var path = parts[0];
+    var query = parts[1] ? '?' + parts[1] : '';
+
+    // Cắt bỏ index.html và .html
+    path = path.replace(/(^|\/)index\.html$/i, '$1');
+    path = path.replace(/\.html$/i, '');
+
+    if (path === '' || path === '/') {
+        path = './';
+    }
+    return path + query;
+}
+
+/* Helper định dạng URL: Chỉ rút gọn NẾU đang chạy qua Cloudflare */
+function formatUrl(url) {
+    if (IS_CLOUDFLARE) {
+        return stripHtmlExtension(url);
+    }
+    return url;
 }
 
 /* ==========================================================================
@@ -91,8 +114,7 @@ function getUrlParam(param) {
         var parts = pairs[i].split('=');
         if (parts[0] === param) {
             var val = parts[1] || '';
-            // Chuyển dấu '+' thành khoảng trắng trước khi decode
-            val = val.replace(/\+/g, ' ');
+            val = val.replace(/\+/g, ' '); // Xử lý khoảng trắng dạng dấu +
             return decodeURIComponent(val);
         }
     }
@@ -138,6 +160,21 @@ function loadTextFile(url, success, error) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
+            /* Tự động kiểm tra Header Cloudflare an toàn cho trình duyệt Java */
+            if (!IS_CLOUDFLARE) {
+                try {
+                    if (typeof xhr.getResponseHeader === 'function') {
+                        var cfRay = xhr.getResponseHeader('CF-Ray');
+                        var server = xhr.getResponseHeader('Server') || '';
+                        if (cfRay || server.toLowerCase().indexOf('cloudflare') !== -1) {
+                            IS_CLOUDFLARE = true;
+                        }
+                    }
+                } catch (e) {
+                    /* Bỏ qua lỗi truy cập Header trên môi trường Java cũ */
+                }
+            }
+
             if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
                 if (success) success(xhr.responseText);
             } else if (error) {
@@ -146,7 +183,7 @@ function loadTextFile(url, success, error) {
         }
     };
 
-    xhr.open('GET', url, true);
+    xhr.open('GET', formatUrl(url), true);
     xhr.send(null);
 }
 
@@ -157,12 +194,12 @@ function fetchJson(url, callback) {
     }
 
     loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
-        try {
-            var data = parseJson(text);
+        var data = parseJson(text);
+        if (data) {
             JSON_CACHE[url] = data;
             if (callback) callback(data);
-        } catch (e) {
-            if (callback) callback(null, e);
+        } else {
+            if (callback) callback(null, 'JSON Parse Error');
         }
     }, function (err) {
         if (callback) callback(null, err);
@@ -235,11 +272,13 @@ function createCardItemHTML(item) {
     var vendor = escapeHtml(item && item.vendor ? item.vendor : 'N/A');
     var id = escapeHtml(item && item.id ? item.id : '');
 
+    var detailLink = formatUrl('detail.html?id=' + id);
+
     return '<div class="wap-card wap-card--row">' +
         '<img src="' + thumb + '" alt="' + title + '" class="wap-card__thumb">' +
         '<div class="wap-card__content">' +
-        '<a href="detail.html?id=' + id + '" class="wap-card__title">' + title + '</a>' +
-        '<div class="wap-card__meta">📱 ' + screen + ' | 👤 ' + vendor + '</div>' +
+        '<a href="' + detailLink + '" class="wap-card__title">' + title + '</a>' +
+        '<div class="wap-card__meta">Màn hình: ' + screen + ' | Hãng: ' + vendor + '</div>' +
         '</div></div>';
 }
 
@@ -282,7 +321,7 @@ function renderHomeSection(cat, containerId, limit) {
     var container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
+    container.innerHTML = '<div class="wap-card">Đang tải...</div>';
     fetchJson('data/index/' + cat + '.json', function (data, err) {
         if (err || !data || !data.length) {
             container.innerHTML = createFallbackItemsHTML();
@@ -303,7 +342,7 @@ function renderListPage(cat, page, perPage) {
     var paginationContainer = document.getElementById('pagination');
     if (!listContainer) return;
 
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Đang tải danh sách...</div>';
     page = page || 1;
     perPage = perPage || 10;
 
@@ -324,9 +363,15 @@ function renderListPage(cat, page, perPage) {
 
         if (paginationContainer && totalPages > 1) {
             var nav = '<div class="pagination">';
-            if (page > 1) nav += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">« Trước</a> ';
+            if (page > 1) {
+                var prevUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page - 1));
+                nav += '<a href="' + prevUrl + '" class="btn btn-secondary">« Trước</a> ';
+            }
             nav += '<span>Trang ' + page + '/' + totalPages + '</span>';
-            if (page < totalPages) nav += ' <a href="?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-secondary">Sau »</a>';
+            if (page < totalPages) {
+                var nextUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page + 1));
+                nav += ' <a href="' + nextUrl + '" class="btn btn-secondary">Sau »</a>';
+            }
             paginationContainer.innerHTML = nav + '</div>';
         }
     });
@@ -338,7 +383,7 @@ function renderSearchResults(query) {
     if (!listContainer) return;
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Đang tìm kiếm...</div>';
 
     var results = [];
     var pending = ALL_CATEGORIES.length;
@@ -371,18 +416,20 @@ function renderSearchResults(query) {
                     var vendor = removeVietnameseTones(item.vendor || '');
                     var id = removeVietnameseTones(item.id || '');
 
+                    // Tìm kiếm khớp chuỗi theo Tên, Hãng hoặc ID
                     if (title.indexOf(cleanQuery) !== -1 ||
                         vendor.indexOf(cleanQuery) !== -1 ||
                         id.indexOf(cleanQuery) !== -1) {
 
-                        var exists = false;
+                        // Lọc trùng lặp bài viết
+                        var isDuplicate = false;
                         for (var k = 0; k < results.length; k++) {
                             if (results[k].id === item.id) {
-                                exists = true;
+                                isDuplicate = true;
                                 break;
                             }
                         }
-                        if (!exists) {
+                        if (!isDuplicate) {
                             results.push(item);
                         }
                     }
@@ -401,11 +448,11 @@ function renderDetailPage(id) {
     var detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
 
-    detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
+    detailContainer.innerHTML = '<div class="wap-card">Đang tải bài viết...</div>';
 
     fetchJson('data/items/' + id + '.json', function (item, err) {
         if (err || !item) {
-            detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>';
+            detailContainer.innerHTML = '<div class="wap-card wap-card--error">Bài viết không tồn tại!</div>';
             return;
         }
 
@@ -417,7 +464,7 @@ function renderDetailPage(id) {
 
         var html = '<div class="title-head">' + title + '</div>' +
             '<div class="wap-card">' +
-            '<div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
+            '<div class="detail-meta"><b>Hãng:</b> ' + vendor + ' | <b>Màn hình:</b> ' + screen + '<br><b>Phiên bản:</b> ' + version + ' | <b>Cập nhật:</b> ' + date + '</div>';
 
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
@@ -438,10 +485,10 @@ function renderDetailPage(id) {
         if (item.downloads) {
             for (var j = 0; j < item.downloads.length; j++) {
                 var group = item.downloads[j];
-                html += '<div class="title-head">📥 ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
+                html += '<div class="title-head">' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card">';
                 for (var k = 0; k < group.files.length; k++) {
                     var fileItem = group.files[k];
-                    html += '<a href="' + fileItem.url + '" class="btn-download" download>💾 ' + fileItem.label + '</a>';
+                    html += '<a href="' + escapeHtml(fileItem.url) + '" class="btn-download" download>' + escapeHtml(fileItem.label) + '</a>';
                 }
                 html += '</div>';
             }
@@ -501,7 +548,7 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
                     alert('Thành công: ' + fullPath);
                 } else {
                     if (targetInputEl) targetInputEl.value = '';
-                    alert('Lỗi upload file!');
+                    alert('Lỗi upload file (Mã lỗi: ' + xhr.status + ')!');
                 }
             }
         };
@@ -511,7 +558,7 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
 }
 
 /* ==========================================================================
-   8. TỰ ĐỘNG XỬ LÝ CLICK CHO TẤT CẢ LIÊN KẾT (CHỈ TRÊN CLOUDFLARE)
+   8. TỰ ĐỘNG XỬ LÝ EVENT BẤM CLICK & SUBMIT FORM TÌM KIẾM (TRÊN CLOUDFLARE)
    ========================================================================== */
 function handleGlobalLinks(e) {
     if (!IS_CLOUDFLARE) return; // Nếu không phải Cloudflare thì giữ nguyên mặc định
@@ -544,9 +591,27 @@ function handleGlobalLinks(e) {
     }
 }
 
-// Lắng nghe sự kiện click trên toàn bộ document
+/* Xử lý Submit Form Tìm Kiếm để cắt đuôi .html trên thanh địa chỉ URL */
+function handleGlobalForms(e) {
+    if (!IS_CLOUDFLARE) return;
+
+    e = e || window.event;
+    var target = e.target || e.srcElement;
+
+    if (target && target.tagName === 'FORM') {
+        var action = target.getAttribute('action') || '';
+        if (action.indexOf('.html') !== -1) {
+            var cleanedAction = stripHtmlExtension(action);
+            target.setAttribute('action', cleanedAction);
+        }
+    }
+}
+
+// Lắng nghe sự kiện click & submit trên toàn bộ document
 if (document.addEventListener) {
     document.addEventListener('click', handleGlobalLinks, false);
+    document.addEventListener('submit', handleGlobalForms, false);
 } else if (document.attachEvent) {
     document.attachEvent('onclick', handleGlobalLinks);
+    document.attachEvent('onsubmit', handleGlobalForms);
 }
