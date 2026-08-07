@@ -1,5 +1,12 @@
 [
   {
+    "id": "xforce",
+    "title": "X-Force",
+    "vendor": "TeaMobi",
+    "screen": "Multi screen",
+    "thumb": ""
+  },
+  {
     "id": "cotuong",
     "title": "Cờ Tướng",
     "vendor": "TeaMobi",
