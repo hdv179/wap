@@ -38,8 +38,6 @@ function initApp() {
     APP_STARTED = true;
 
     initTheme();
-    loadComponent('header', 'templates/tpl-header.html');
-    loadComponent('footer', 'templates/tpl-footer.html');
     routePageData();
 }
 
