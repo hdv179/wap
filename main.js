@@ -6,7 +6,6 @@ var ALL_CATEGORIES = HOME_CATEGORIES.slice(0);
 var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
-var IS_CLOUDFLARE = false; /* Cờ nhận diện Cloudflare */
 
 /* Polyfill String.prototype.trim cho JS đời cũ */
 if (!String.prototype.trim) {
@@ -20,11 +19,7 @@ function parseJson(text) {
     if (window.JSON && typeof window.JSON.parse === 'function') {
         return window.JSON.parse(text);
     }
-    try {
-        return (new Function('return ' + text))();
-    } catch (e) {
-        return null;
-    }
+    return (new Function('return ' + text))();
 }
 
 /* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
@@ -32,10 +27,7 @@ function stringifyJson(obj) {
     if (window.JSON && typeof window.JSON.stringify === 'function') {
         return window.JSON.stringify(obj);
     }
-    var msg = (obj.message || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    var content = (obj.content || '');
-    var sha = obj.sha ? ',"sha":"' + obj.sha + '"' : '';
-    return '{"message":"' + msg + '","content":"' + content + '"' + sha + '}';
+    return '{"message":"' + (obj.message || '').replace(/"/g, '\\"') + '","content":"' + (obj.content || '') + '"}';
 }
 
 /* Helper xóa dấu tiếng Việt giúp tìm kiếm không phụ thuộc vào dấu */
@@ -50,31 +42,6 @@ function removeVietnameseTones(str) {
     str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
     str = str.replace(/đ/g, "d");
     return str;
-}
-
-/* Helper thực hiện cắt đuôi .html và index.html */
-function stripHtmlExtension(url) {
-    if (!url) return '';
-    var parts = url.split('?');
-    var path = parts[0];
-    var query = parts[1] ? '?' + parts[1] : '';
-
-    // Cắt bỏ index.html và .html
-    path = path.replace(/(^|\/)index\.html$/i, '$1');
-    path = path.replace(/\.html$/i, '');
-
-    if (path === '' || path === '/') {
-        path = './';
-    }
-    return path + query;
-}
-
-/* Helper định dạng URL: Chỉ rút gọn NẾU đang chạy qua Cloudflare */
-function formatUrl(url) {
-    if (IS_CLOUDFLARE) {
-        return stripHtmlExtension(url);
-    }
-    return url;
 }
 
 /* ==========================================================================
@@ -113,7 +80,10 @@ function getUrlParam(param) {
     for (var i = 0; i < pairs.length; i++) {
         var parts = pairs[i].split('=');
         if (parts[0] === param) {
-            return decodeURIComponent(parts[1] || '');
+            var val = parts[1] || '';
+            // Chuyển dấu '+' thành khoảng trắng trước khi decode (sửa lỗi Opera/Java)
+            val = val.replace(/\+/g, ' ');
+            return decodeURIComponent(val);
         }
     }
     return '';
@@ -158,21 +128,6 @@ function loadTextFile(url, success, error) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            /* Tự động kiểm tra Header Cloudflare an toàn cho trình duyệt Java */
-            if (!IS_CLOUDFLARE) {
-                try {
-                    if (typeof xhr.getResponseHeader === 'function') {
-                        var cfRay = xhr.getResponseHeader('CF-Ray');
-                        var server = xhr.getResponseHeader('Server') || '';
-                        if (cfRay || server.toLowerCase().indexOf('cloudflare') !== -1) {
-                            IS_CLOUDFLARE = true;
-                        }
-                    }
-                } catch (e) {
-                    /* Bỏ qua lỗi truy cập Header trên môi trường Java cũ */
-                }
-            }
-
             if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
                 if (success) success(xhr.responseText);
             } else if (error) {
@@ -181,7 +136,7 @@ function loadTextFile(url, success, error) {
         }
     };
 
-    xhr.open('GET', formatUrl(url), true);
+    xhr.open('GET', url, true);
     xhr.send(null);
 }
 
@@ -192,12 +147,12 @@ function fetchJson(url, callback) {
     }
 
     loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
-        var data = parseJson(text);
-        if (data) {
+        try {
+            var data = parseJson(text);
             JSON_CACHE[url] = data;
             if (callback) callback(data);
-        } else {
-            if (callback) callback(null, 'JSON Parse Error');
+        } catch (e) {
+            if (callback) callback(null, e);
         }
     }, function (err) {
         if (callback) callback(null, err);
@@ -270,13 +225,11 @@ function createCardItemHTML(item) {
     var vendor = escapeHtml(item && item.vendor ? item.vendor : 'N/A');
     var id = escapeHtml(item && item.id ? item.id : '');
 
-    var detailLink = formatUrl('detail.html?id=' + id);
-
     return '<div class="wap-card wap-card--row">' +
         '<img src="' + thumb + '" alt="' + title + '" class="wap-card__thumb">' +
         '<div class="wap-card__content">' +
-        '<a href="' + detailLink + '" class="wap-card__title">' + title + '</a>' +
-        '<div class="wap-card__meta">Màn hình: ' + screen + ' | Hãng: ' + vendor + '</div>' +
+        '<a href="detail.html?id=' + id + '" class="wap-card__title">' + title + '</a>' +
+        '<div class="wap-card__meta">📱 ' + screen + ' | 👤 ' + vendor + '</div>' +
         '</div></div>';
 }
 
@@ -319,7 +272,7 @@ function renderHomeSection(cat, containerId, limit) {
     var container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = '<div class="wap-card">Đang tải...</div>';
+    container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
     fetchJson('data/index/' + cat + '.json', function (data, err) {
         if (err || !data || !data.length) {
             container.innerHTML = createFallbackItemsHTML();
@@ -340,7 +293,7 @@ function renderListPage(cat, page, perPage) {
     var paginationContainer = document.getElementById('pagination');
     if (!listContainer) return;
 
-    listContainer.innerHTML = '<div class="wap-card">Đang tải danh sách...</div>';
+    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
     page = page || 1;
     perPage = perPage || 10;
 
@@ -361,15 +314,9 @@ function renderListPage(cat, page, perPage) {
 
         if (paginationContainer && totalPages > 1) {
             var nav = '<div class="pagination">';
-            if (page > 1) {
-                var prevUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page - 1));
-                nav += '<a href="' + prevUrl + '" class="btn btn-secondary">« Trước</a> ';
-            }
+            if (page > 1) nav += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">« Trước</a> ';
             nav += '<span>Trang ' + page + '/' + totalPages + '</span>';
-            if (page < totalPages) {
-                var nextUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page + 1));
-                nav += ' <a href="' + nextUrl + '" class="btn btn-secondary">Sau »</a>';
-            }
+            if (page < totalPages) nav += ' <a href="?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-secondary">Sau »</a>';
             paginationContainer.innerHTML = nav + '</div>';
         }
     });
@@ -381,7 +328,7 @@ function renderSearchResults(query) {
     if (!listContainer) return;
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
 
     var results = [];
     var pending = ALL_CATEGORIES.length;
@@ -402,7 +349,7 @@ function renderSearchResults(query) {
         listContainer.innerHTML = html;
     }
 
-    function searchInCategory(catName) {
+    function searchCategory(catName) {
         fetchJson('data/index/' + catName + '.json', function (data) {
             pending--;
             if (data && data.length) {
@@ -410,17 +357,17 @@ function renderSearchResults(query) {
                     var item = data[j];
                     if (!item) continue;
 
-                    var itemTitle = removeVietnameseTones(item.title || '');
-                    var itemVendor = removeVietnameseTones(item.vendor || '');
-                    var itemId = removeVietnameseTones(item.id || '');
+                    var title = removeVietnameseTones(item.title || '');
+                    var vendor = removeVietnameseTones(item.vendor || '');
+                    var id = removeVietnameseTones(item.id || '');
 
-                    if (itemTitle.indexOf(cleanQuery) !== -1 ||
-                        itemVendor.indexOf(cleanQuery) !== -1 ||
-                        itemId.indexOf(cleanQuery) !== -1) {
+                    if (title.indexOf(cleanQuery) !== -1 ||
+                        vendor.indexOf(cleanQuery) !== -1 ||
+                        id.indexOf(cleanQuery) !== -1) {
 
                         var exists = false;
-                        for (var r = 0; r < results.length; r++) {
-                            if (results[r].id === item.id) {
+                        for (var k = 0; k < results.length; k++) {
+                            if (results[k].id === item.id) {
                                 exists = true;
                                 break;
                             }
@@ -436,7 +383,7 @@ function renderSearchResults(query) {
     }
 
     for (var i = 0; i < ALL_CATEGORIES.length; i++) {
-        searchInCategory(ALL_CATEGORIES[i]);
+        searchCategory(ALL_CATEGORIES[i]);
     }
 }
 
@@ -444,11 +391,11 @@ function renderDetailPage(id) {
     var detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
 
-    detailContainer.innerHTML = '<div class="wap-card">Đang tải bài viết...</div>';
+    detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
 
     fetchJson('data/items/' + id + '.json', function (item, err) {
         if (err || !item) {
-            detailContainer.innerHTML = '<div class="wap-card wap-card--error">Bài viết không tồn tại!</div>';
+            detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>';
             return;
         }
 
@@ -460,7 +407,7 @@ function renderDetailPage(id) {
 
         var html = '<div class="title-head">' + title + '</div>' +
             '<div class="wap-card">' +
-            '<div class="detail-meta"><b>Hãng:</b> ' + vendor + ' | <b>Màn hình:</b> ' + screen + '<br><b>Phiên bản:</b> ' + version + ' | <b>Cập nhật:</b> ' + date + '</div>';
+            '<div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
 
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
@@ -481,10 +428,10 @@ function renderDetailPage(id) {
         if (item.downloads) {
             for (var j = 0; j < item.downloads.length; j++) {
                 var group = item.downloads[j];
-                html += '<div class="title-head">' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card">';
+                html += '<div class="title-head">📥 ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
                 for (var k = 0; k < group.files.length; k++) {
                     var fileItem = group.files[k];
-                    html += '<a href="' + escapeHtml(fileItem.url) + '" class="btn-download" download>' + escapeHtml(fileItem.label) + '</a>';
+                    html += '<a href="' + fileItem.url + '" class="btn-download" download>💾 ' + fileItem.label + '</a>';
                 }
                 html += '</div>';
             }
@@ -544,67 +491,11 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
                     alert('Thành công: ' + fullPath);
                 } else {
                     if (targetInputEl) targetInputEl.value = '';
-                    alert('Lỗi upload file (Mã lỗi: ' + xhr.status + ')!');
+                    alert('Lỗi upload file!');
                 }
             }
         };
         xhr.send(stringifyJson({ message: 'Upload: ' + fileName, content: base64Content }));
     };
     reader.readAsDataURL(fileObj);
-}
-
-/* ==========================================================================
-   8. TỰ ĐỘNG XỬ LÝ CLICK LIÊN KẾT & SUBMIT FORM (CHỈ TRÊN CLOUDFLARE)
-   ========================================================================== */
-function handleGlobalLinks(e) {
-    if (!IS_CLOUDFLARE) return;
-
-    e = e || window.event;
-    var target = e.target || e.srcElement;
-
-    while (target && target.tagName !== 'A') {
-        target = target.parentNode;
-    }
-
-    if (target && target.tagName === 'A') {
-        var href = target.getAttribute('href');
-
-        if (!href || href.indexOf('http://') === 0 || href.indexOf('https://') === 0 || href.indexOf('#') === 0 || href.indexOf('javascript:') === 0 || target.hasAttribute('download')) {
-            return;
-        }
-
-        var cleanedUrl = stripHtmlExtension(href);
-        if (cleanedUrl !== href) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            } else {
-                e.returnValue = false;
-            }
-            window.location.href = cleanedUrl;
-        }
-    }
-}
-
-function handleGlobalForms(e) {
-    if (!IS_CLOUDFLARE) return;
-
-    e = e || window.event;
-    var target = e.target || e.srcElement;
-
-    if (target && target.tagName === 'FORM') {
-        var action = target.getAttribute('action') || '';
-        if (action.indexOf('.html') !== -1) {
-            var cleanedAction = stripHtmlExtension(action);
-            target.setAttribute('action', cleanedAction);
-        }
-    }
-}
-
-// Lắng nghe sự kiện click & submit trên toàn bộ document
-if (document.addEventListener) {
-    document.addEventListener('click', handleGlobalLinks, false);
-    document.addEventListener('submit', handleGlobalForms, false);
-} else if (document.attachEvent) {
-    document.attachEvent('onclick', handleGlobalLinks);
-    document.attachEvent('onsubmit', handleGlobalForms);
 }
