@@ -127,10 +127,14 @@ function loadTextFile(url, success, error) {
         xhr = new XMLHttpRequest();
     } catch (e) {
         try {
-            xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            xhr = new ActiveXObject('Msxml2.XMLHTTP');
         } catch (e2) {
-            if (error) error('XHR not supported');
-            return;
+            try {
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            } catch (e3) {
+                if (error) error('XHR not supported');
+                return;
+            }
         }
     }
 
