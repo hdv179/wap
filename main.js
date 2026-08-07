@@ -6,16 +6,14 @@ var ALL_CATEGORIES = HOME_CATEGORIES.slice(0);
 var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
-var IS_CLOUDFLARE = false; /* Cờ nhận diện Cloudflare */
+var IS_CLOUDFLARE = false;
 
-/* Polyfill String.prototype.trim cho JS đời cũ */
 if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/g, '');
     };
 }
 
-/* Helper xóa dấu tiếng Việt giúp tìm kiếm chính xác */
 function removeVietnameseTones(str) {
     if (!str) return '';
     str = String(str).toLowerCase();
@@ -29,7 +27,6 @@ function removeVietnameseTones(str) {
     return str;
 }
 
-/* Helper ép kiểu JSON an toàn không phụ thuộc JSON.parse gốc */
 function parseJson(text) {
     if (window.JSON && typeof window.JSON.parse === 'function') {
         return window.JSON.parse(text);
@@ -41,7 +38,6 @@ function parseJson(text) {
     }
 }
 
-/* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
 function stringifyJson(obj) {
     if (window.JSON && typeof window.JSON.stringify === 'function') {
         return window.JSON.stringify(obj);
@@ -52,14 +48,12 @@ function stringifyJson(obj) {
     return '{"message":"' + msg + '","content":"' + content + '"' + sha + '}';
 }
 
-/* Helper thực hiện cắt đuôi .html và index.html */
 function stripHtmlExtension(url) {
     if (!url) return '';
     var parts = url.split('?');
     var path = parts[0];
     var query = parts[1] ? '?' + parts[1] : '';
 
-    // Cắt bỏ index.html và .html
     path = path.replace(/(^|\/)index\.html$/i, '$1');
     path = path.replace(/\.html$/i, '');
 
@@ -69,7 +63,6 @@ function stripHtmlExtension(url) {
     return path + query;
 }
 
-/* Helper định dạng URL: Chỉ rút gọn NẾU đang chạy qua Cloudflare */
 function formatUrl(url) {
     if (IS_CLOUDFLARE) {
         return stripHtmlExtension(url);
@@ -78,7 +71,7 @@ function formatUrl(url) {
 }
 
 /* ==========================================================================
-   2. KHỞI TẠO ỨNG DỤNG (DOM READY / ONLOAD)
+   2. KHỞI TẠO ỨNG DỤNG
    ========================================================================== */
 function initApp() {
     if (APP_STARTED) return;
@@ -109,12 +102,13 @@ window.onload = function () {
    ========================================================================== */
 function getUrlParam(param) {
     var query = window.location.search || '';
+    if (!query) return '';
+    
     var pairs = query.replace(/^\?/, '').split('&');
     for (var i = 0; i < pairs.length; i++) {
         var parts = pairs[i].split('=');
         if (parts[0] === param) {
             var val = parts[1] || '';
-            // Giải mã khoảng trắng từ dấu '+' hoặc '%20'
             val = val.replace(/\+/g, ' ');
             try {
                 return decodeURIComponent(val);
@@ -165,7 +159,6 @@ function loadTextFile(url, success, error) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            /* Tự động kiểm tra Header Cloudflare an toàn cho trình duyệt Java */
             if (!IS_CLOUDFLARE) {
                 try {
                     if (typeof xhr.getResponseHeader === 'function') {
@@ -175,9 +168,7 @@ function loadTextFile(url, success, error) {
                             IS_CLOUDFLARE = true;
                         }
                     }
-                } catch (e) {
-                    /* Bỏ qua lỗi truy cập Header trên môi trường Java cũ */
-                }
+                } catch (e) {}
             }
 
             if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
@@ -268,7 +259,7 @@ function setTheme(themeName) {
 }
 
 /* ==========================================================================
-   5. TEMPLATE BUILDERS (TẠO HTML DẠNG CHUỖI)
+   5. TEMPLATE BUILDERS
    ========================================================================== */
 function createCardItemHTML(item) {
     var title = escapeHtml(item && item.title ? item.title : 'Không có tiêu đề');
@@ -299,18 +290,23 @@ function routePageData() {
     var id = getUrlParam('id');
     var query = getUrlParam('q');
 
-    if (document.getElementById('post-detail') && id) {
+    var listContainer = document.getElementById('post-list');
+    var detailContainer = document.getElementById('post-detail');
+    var catTitle = document.getElementById('category-title');
+
+    /* Tự động ưu tiên xử lý tìm kiếm nếu có tham số query (q) trong URL */
+    if (query && query.trim() !== '') {
+        if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
+        renderSearchResults(query.trim());
+        return;
+    }
+
+    if (detailContainer && id) {
         renderDetailPage(id);
-    } else if (document.getElementById('post-list')) {
-        var catTitle = document.getElementById('category-title');
-        if (query && query.trim() !== '') {
-            if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
-            renderSearchResults(query.trim());
-        } else {
-            var page = parseInt(getUrlParam('page'), 10) || 1;
-            if (catTitle) setTextContent(catTitle, 'DANH MỤC: ' + cat.toUpperCase());
-            renderListPage(cat, page);
-        }
+    } else if (listContainer) {
+        var page = parseInt(getUrlParam('page'), 10) || 1;
+        if (catTitle) setTextContent(catTitle, 'DANH MỤC: ' + cat.toUpperCase());
+        renderListPage(cat, page);
     } else if (document.getElementById('home-gameloft')) {
         renderHomePage();
     }
@@ -382,14 +378,21 @@ function renderListPage(cat, page, perPage) {
     });
 }
 
-/* Tối ưu hóa hàm tìm kiếm: Đệ quy theo thứ tự (Sequential Queue) để tránh trôi biến & lỗi bất đồng bộ */
 function renderSearchResults(query) {
     var listContainer = document.getElementById('post-list');
     var paginationContainer = document.getElementById('pagination');
-    if (!listContainer) return;
+
+    /* Nếu đang ở trang chủ không có container post-list, tạo nhanh vùng hiển thị */
+    if (!listContainer) {
+        var mainWrapper = document.getElementById('main-content') || document.body;
+        var searchBox = document.createElement('div');
+        searchBox.id = 'post-list';
+        mainWrapper.appendChild(searchBox);
+        listContainer = searchBox;
+    }
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Đang tìm kiếm...</div>';
 
     var results = [];
     var cleanQuery = removeVietnameseTones(query);
@@ -397,7 +400,6 @@ function renderSearchResults(query) {
 
     function processNextCategory() {
         if (categoryIndex >= ALL_CATEGORIES.length) {
-            // Hoàn tất quét toàn bộ danh mục
             if (!results.length) {
                 listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả phù hợp cho "<b>' + escapeHtml(query) + '</b>".</div>';
                 return;
@@ -428,7 +430,6 @@ function renderSearchResults(query) {
                         vendor.indexOf(cleanQuery) !== -1 ||
                         id.indexOf(cleanQuery) !== -1) {
 
-                        // Tránh thêm trùng id bài viết
                         var isDuplicate = false;
                         for (var k = 0; k < results.length; k++) {
                             if (results[k].id === item.id) {
@@ -442,12 +443,10 @@ function renderSearchResults(query) {
                     }
                 }
             }
-            // Gọi tiếp danh mục tiếp theo
             processNextCategory();
         });
     }
 
-    // Bắt đầu tìm kiếm từ danh mục đầu tiên
     processNextCategory();
 }
 
@@ -565,15 +564,14 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
 }
 
 /* ==========================================================================
-   8. TỰ ĐỘNG XỬ LÝ EVENT BẤM CLICK & SUBMIT FORM TÌM KIẾM (TRÊN CLOUDFLARE)
+   8. TỰ ĐỘNG XỬ LÝ EVENT BẤM CLICK & SUBMIT FORM TÌM KIẾM
    ========================================================================== */
 function handleGlobalLinks(e) {
-    if (!IS_CLOUDFLARE) return; // Nếu không phải Cloudflare thì giữ nguyên mặc định
+    if (!IS_CLOUDFLARE) return;
 
     e = e || window.event;
     var target = e.target || e.srcElement;
 
-    // Tìm thẻ <a> gần nhất
     while (target && target.tagName !== 'A') {
         target = target.parentNode;
     }
@@ -581,7 +579,6 @@ function handleGlobalLinks(e) {
     if (target && target.tagName === 'A') {
         var href = target.getAttribute('href');
 
-        // Bỏ qua các link ngoài, link neo (#), javascript, hoặc link download
         if (!href || href.indexOf('http://') === 0 || href.indexOf('https://') === 0 || href.indexOf('#') === 0 || href.indexOf('javascript:') === 0 || target.hasAttribute('download')) {
             return;
         }
@@ -591,14 +588,13 @@ function handleGlobalLinks(e) {
             if (e.preventDefault) {
                 e.preventDefault();
             } else {
-                e.returnValue = false; // Hỗ trợ browser Java / IE cũ
+                e.returnValue = false;
             }
             window.location.href = cleanedUrl;
         }
     }
 }
 
-/* Xử lý Submit Form Tìm Kiếm để cắt đuôi .html trên thanh địa chỉ URL */
 function handleGlobalForms(e) {
     if (!IS_CLOUDFLARE) return;
 
@@ -614,7 +610,6 @@ function handleGlobalForms(e) {
     }
 }
 
-// Lắng nghe sự kiện click & submit trên toàn bộ document
 if (document.addEventListener) {
     document.addEventListener('click', handleGlobalLinks, false);
     document.addEventListener('submit', handleGlobalForms, false);
