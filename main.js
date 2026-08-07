@@ -1,63 +1,17 @@
 /* ==========================================================================
-   1. HẰNG SỐ, BIẾN TOÀN CỤC & POLYFILLS
+   1. HẰNG SỐ & TIỆN ÍCH
    ========================================================================== */
 var HOME_CATEGORIES = ['gameloft', 'teamobi', 'gameonline', 'gameoffline', 'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 'nhacchuong', 'chude', 'doctruyen', 'thuthuat'];
 var ALL_CATEGORIES = HOME_CATEGORIES.slice(0);
-var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
 
-/* Polyfill String.prototype.trim cho JS đời cũ */
 if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/g, '');
     };
 }
 
-/* Helper ép kiểu JSON an toàn không phụ thuộc JSON.parse gốc */
-function parseJson(text) {
-    if (window.JSON && typeof window.JSON.parse === 'function') {
-        return window.JSON.parse(text);
-    }
-    return (new Function('return ' + text))();
-}
-
-/* Helper chuỗi hóa JSON phục vụ Upload trên trình duyệt Java không có JSON.stringify */
-function stringifyJson(obj) {
-    if (window.JSON && typeof window.JSON.stringify === 'function') {
-        return window.JSON.stringify(obj);
-    }
-    return '{"message":"' + (obj.message || '').replace(/"/g, '\\"') + '","content":"' + (obj.content || '') + '"}';
-}
-
-/* ==========================================================================
-   2. KHỞI TẠO ỨNG DỤNG (DOM READY / ONLOAD)
-   ========================================================================== */
-function initApp() {
-    if (APP_STARTED) return;
-    APP_STARTED = true;
-
-    initTheme();
-    routePageData();
-}
-
-if (document.addEventListener) {
-    document.addEventListener('DOMContentLoaded', initApp, false);
-} else if (document.attachEvent) {
-    document.attachEvent('onreadystatechange', function () {
-        if (document.readyState === 'complete') {
-            initApp();
-        }
-    });
-}
-
-window.onload = function () {
-    initApp();
-};
-
-/* ==========================================================================
-   3. HÀM TIỆN ÍCH HỆ THỐNG & HTTP REQUEST (XHR)
-   ========================================================================== */
 function getUrlParam(param) {
     var query = window.location.search || '';
     var pairs = query.replace(/^\?/, '').split('&');
@@ -90,67 +44,30 @@ function setTextContent(el, text) {
     }
 }
 
-function loadTextFile(url, success, error) {
-    var xhr = null;
-    try {
-        xhr = new XMLHttpRequest();
-    } catch (e1) {
-        try {
-            xhr = new ActiveXObject('Msxml2.XMLHTTP');
-        } catch (e2) {
-            try {
-                xhr = new ActiveXObject('Microsoft.XMLHTTP');
-            } catch (e3) {
-                if (error) error('XHR not supported');
-                return;
-            }
-        }
-    }
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
-                if (success) success(xhr.responseText);
-            } else if (error) {
-                error(xhr.status);
-            }
+/* ==========================================================================
+   2. TIỆN ÍCH NẠP SCRIPT ĐỘNG THAY CHO AJAX/XHR
+   ========================================================================== */
+function loadDataScript(src, callback) {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = src + '?v=' + new Date().getTime();
+    
+    script.onload = function () {
+        if (callback) callback(true);
+    };
+    script.onerror = function () {
+        if (callback) callback(false);
+    };
+    script.onreadystatechange = function () {
+        if (this.readyState === 'loaded' || this.readyState === 'complete') {
+            if (callback) callback(true);
         }
     };
-
-    xhr.open('GET', url, true);
-    xhr.send(null);
-}
-
-function fetchJson(url, callback) {
-    if (JSON_CACHE[url]) {
-        if (callback) callback(JSON_CACHE[url]);
-        return;
-    }
-
-    loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
-        try {
-            var data = parseJson(text);
-            JSON_CACHE[url] = data;
-            if (callback) callback(data);
-        } catch (e) {
-            if (callback) callback(null, e);
-        }
-    }, function (err) {
-        if (callback) callback(null, err);
-    });
-}
-
-function loadComponent(elementId, filePath) {
-    var targetEl = document.getElementById(elementId);
-    if (!targetEl) return;
-
-    loadTextFile(filePath + '?v=' + new Date().getTime(), function (html) {
-        if (html) targetEl.innerHTML = html;
-    });
+    document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 /* ==========================================================================
-   4. QUẢN LÝ THEME & COOKIE
+   3. THEME MANAGEMENT
    ========================================================================== */
 function getCookie(name) {
     var value = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
@@ -197,7 +114,7 @@ function setTheme(themeName) {
 }
 
 /* ==========================================================================
-   5. TEMPLATE BUILDERS (TẠO HTML DẠNG CHUỖI)
+   4. TEMPLATE BUILDERS
    ========================================================================== */
 function createCardItemHTML(item) {
     var title = escapeHtml(item && item.title ? item.title : 'Không có tiêu đề');
@@ -210,16 +127,16 @@ function createCardItemHTML(item) {
         '<img src="' + thumb + '" alt="' + title + '" class="wap-card__thumb">' +
         '<div class="wap-card__content">' +
         '<a href="detail.html?id=' + id + '" class="wap-card__title">' + title + '</a>' +
-        '<div class="wap-card__meta">📱 ' + screen + ' | 👤 ' + vendor + '</div>' +
+        '<div class="wap-card__meta">MH: ' + screen + ' | Hang: ' + vendor + '</div>' +
         '</div></div>';
 }
 
 function createFallbackItemsHTML() {
-    return '<div class="wap-card">Không có dữ liệu để hiển thị. Vui lòng kiểm tra file JSON hoặc đường dẫn ảnh.</div>';
+    return '<div class="wap-card">Không có dữ liệu để hiển thị.</div>';
 }
 
 /* ==========================================================================
-   6. BỘ ĐIỀU HƯỚNG & RENDER TRANG
+   5. BỘ ĐIỀU HƯỚNG & RENDER NỘI DUNG
    ========================================================================== */
 function routePageData() {
     var cat = getUrlParam('cat') || 'gameloft';
@@ -231,11 +148,11 @@ function routePageData() {
     } else if (document.getElementById('post-list')) {
         var catTitle = document.getElementById('category-title');
         if (query) {
-            if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
+            if (catTitle) setTextContent(catTitle, 'TIM KIEM: "' + query.toUpperCase() + '"');
             renderSearchResults(query.trim().toLowerCase());
         } else {
             var page = parseInt(getUrlParam('page'), 10) || 1;
-            if (catTitle) setTextContent(catTitle, 'DANH MỤC: ' + cat.toUpperCase());
+            if (catTitle) setTextContent(catTitle, 'DANH MUC: ' + cat.toUpperCase());
             renderListPage(cat, page);
         }
     } else if (document.getElementById('home-gameloft')) {
@@ -253,9 +170,13 @@ function renderHomeSection(cat, containerId, limit) {
     var container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
-    fetchJson('data/index/' + cat + '.json', function (data, err) {
-        if (err || !data || !data.length) {
+    container.innerHTML = '<div class="wap-card">Dang tai...</div>';
+    
+    // Nạp file JS dữ liệu thay vì JSON
+    window.CURRENT_CAT_DATA = null;
+    loadDataScript('data/index/' + cat + '.js', function (success) {
+        var data = window.CURRENT_CAT_DATA;
+        if (!success || !data || !data.length) {
             container.innerHTML = createFallbackItemsHTML();
             return;
         }
@@ -274,12 +195,14 @@ function renderListPage(cat, page, perPage) {
     var paginationContainer = document.getElementById('pagination');
     if (!listContainer) return;
 
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Dang tai danh sach...</div>';
     page = page || 1;
     perPage = perPage || 10;
 
-    fetchJson('data/index/' + cat + '.json', function (data, err) {
-        if (err || !data || !data.length) {
+    window.CURRENT_CAT_DATA = null;
+    loadDataScript('data/index/' + cat + '.js', function (success) {
+        var data = window.CURRENT_CAT_DATA;
+        if (!success || !data || !data.length) {
             listContainer.innerHTML = createFallbackItemsHTML();
             return;
         }
@@ -295,9 +218,9 @@ function renderListPage(cat, page, perPage) {
 
         if (paginationContainer && totalPages > 1) {
             var nav = '<div class="pagination">';
-            if (page > 1) nav += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">« Trước</a> ';
+            if (page > 1) nav += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">&laquo; Truoc</a> ';
             nav += '<span>Trang ' + page + '/' + totalPages + '</span>';
-            if (page < totalPages) nav += ' <a href="?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-secondary">Sau »</a>';
+            if (page < totalPages) nav += ' <a href="?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-secondary">Sau &raquo;</a>';
             paginationContainer.innerHTML = nav + '</div>';
         }
     });
@@ -309,7 +232,7 @@ function renderSearchResults(query) {
     if (!listContainer) return;
 
     if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
+    listContainer.innerHTML = '<div class="wap-card">Dang tim kiem...</div>';
 
     var results = [];
     var pending = ALL_CATEGORIES.length;
@@ -318,11 +241,11 @@ function renderSearchResults(query) {
         if (pending > 0) return;
 
         if (!results.length) {
-            listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả cho "<b>' + query + '</b>".</div>';
+            listContainer.innerHTML = '<div class="wap-card">Khong tim thay ket qua cho "<b>' + escapeHtml(query) + '</b>".</div>';
             return;
         }
 
-        var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
+        var html = '<div class="search-result-summary">Tim thay <b>' + results.length + '</b> ket qua:</div>';
         for (var i = 0; i < results.length; i++) {
             html += createCardItemHTML(results[i]);
         }
@@ -330,20 +253,23 @@ function renderSearchResults(query) {
     }
 
     for (var i = 0; i < ALL_CATEGORIES.length; i++) {
-        fetchJson('data/index/' + ALL_CATEGORIES[i] + '.json', function (data) {
-            pending--;
-            if (data && data.length) {
-                for (var j = 0; j < data.length; j++) {
-                    var item = data[j];
-                    if (item && item.title && item.title.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
-                    } else if (item && item.vendor && item.vendor.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
+        (function(categoryName) {
+            loadDataScript('data/index/' + categoryName + '.js', function () {
+                pending--;
+                var data = window.CURRENT_CAT_DATA;
+                if (data && data.length) {
+                    for (var j = 0; j < data.length; j++) {
+                        var item = data[j];
+                        if (item && item.title && item.title.toLowerCase().indexOf(query) !== -1) {
+                            results.push(item);
+                        } else if (item && item.vendor && item.vendor.toLowerCase().indexOf(query) !== -1) {
+                            results.push(item);
+                        }
                     }
                 }
-            }
-            checkDone();
-        });
+                checkDone();
+            });
+        })(ALL_CATEGORIES[i]);
     }
 }
 
@@ -351,11 +277,13 @@ function renderDetailPage(id) {
     var detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
 
-    detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
+    detailContainer.innerHTML = '<div class="wap-card">Dang tai bai viet...</div>';
 
-    fetchJson('data/items/' + id + '.json', function (item, err) {
-        if (err || !item) {
-            detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>';
+    window.CURRENT_ITEM_DATA = null;
+    loadDataScript('data/items/' + id + '.js', function (success) {
+        var item = window.CURRENT_ITEM_DATA;
+        if (!success || !item) {
+            detailContainer.innerHTML = '<div class="wap-card wap-card--error">Bai viet khong ton tai!</div>';
             return;
         }
 
@@ -367,7 +295,7 @@ function renderDetailPage(id) {
 
         var html = '<div class="title-head">' + title + '</div>' +
             '<div class="wap-card">' +
-            '<div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
+            '<div class="detail-meta"><b>Hang:</b> ' + vendor + ' | <b>Man hinh:</b> ' + screen + '<br><b>Phien ban:</b> ' + version + ' | <b>Cap nhat:</b> ' + date + '</div>';
 
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
@@ -388,10 +316,10 @@ function renderDetailPage(id) {
         if (item.downloads) {
             for (var j = 0; j < item.downloads.length; j++) {
                 var group = item.downloads[j];
-                html += '<div class="title-head">📥 ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
+                html += '<div class="title-head">TAI VE: ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
                 for (var k = 0; k < group.files.length; k++) {
                     var fileItem = group.files[k];
-                    html += '<a href="' + fileItem.url + '" class="btn-download" download>💾 ' + fileItem.label + '</a>';
+                    html += '<a href="' + fileItem.url + '" class="btn-download">Tai ve: ' + escapeHtml(fileItem.label) + '</a>';
                 }
                 html += '</div>';
             }
@@ -401,61 +329,21 @@ function renderDetailPage(id) {
     });
 }
 
-/* ==========================================================================
-   7. CHỨC NĂNG QUẢN TRỊ (UPLOAD GITHUB)
-   ========================================================================== */
-function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
-    var tokenEl = document.getElementById('gh-token');
-    var repoEl = document.getElementById('gh-repo');
-    var itemIdEl = document.getElementById('game-id');
-
-    var token = tokenEl ? tokenEl.value.trim() : '';
-    var repo = repoEl ? repoEl.value.trim() : '';
-    var itemId = itemIdEl ? itemIdEl.value.trim() : '';
-
-    if (!token || !repo) {
-        alert('Thiếu Token hoặc Repo!');
-        return;
-    }
-
-    var baseName = customBaseName ? customBaseName.trim() : itemId;
-    if (!baseName) {
-        alert('Vui lòng nhập ID bài viết hoặc Tên file!');
-        return;
-    }
-
-    baseName = baseName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
-    var ext = (fileObj.name || '').split('.').pop().toLowerCase();
-    var fileName = baseName + '-' + new Date().getTime() + '.' + ext;
-    var fullPath = folderPath + '/' + fileName;
-    var apiUrl = 'https://api.github.com/repos/' + repo + '/contents/' + fullPath;
-
-    if (targetInputEl) targetInputEl.value = 'Đang tải lên...';
-
-    if (!window.FileReader) {
-        alert('Trình duyệt này không hỗ trợ FileReader để tải lên.');
-        return;
-    }
-
-    var reader = new FileReader();
-    reader.onload = function () {
-        var base64Content = reader.result.split(',')[1];
-        var xhr = new XMLHttpRequest();
-        xhr.open('PUT', apiUrl, true);
-        xhr.setRequestHeader('Authorization', 'token ' + token);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    if (targetInputEl) targetInputEl.value = fullPath;
-                    alert('Thành công: ' + fullPath);
-                } else {
-                    if (targetInputEl) targetInputEl.value = '';
-                    alert('Lỗi upload file!');
-                }
-            }
-        };
-        xhr.send(stringifyJson({ message: 'Upload: ' + fileName, content: base64Content }));
-    };
-    reader.readAsDataURL(fileObj);
+function initApp() {
+    if (APP_STARTED) return;
+    APP_STARTED = true;
+    initTheme();
+    routePageData();
 }
+
+if (document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', initApp, false);
+} else if (document.attachEvent) {
+    document.attachEvent('onreadystatechange', function () {
+        if (document.readyState === 'complete') initApp();
+    });
+}
+
+window.onload = function () {
+    initApp();
+};
