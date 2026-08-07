@@ -38,6 +38,20 @@ function stringifyJson(obj) {
     return '{"message":"' + msg + '","content":"' + content + '"' + sha + '}';
 }
 
+/* Helper xóa dấu tiếng Việt giúp tìm kiếm không phụ thuộc vào dấu */
+function removeVietnameseTones(str) {
+    if (!str) return '';
+    str = str.toLowerCase();
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    return str;
+}
+
 /* Helper thực hiện cắt đuôi .html và index.html */
 function stripHtmlExtension(url) {
     if (!url) return '';
@@ -284,7 +298,7 @@ function routePageData() {
         var catTitle = document.getElementById('category-title');
         if (query) {
             if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
-            renderSearchResults(query.trim().toLowerCase());
+            renderSearchResults(query.trim());
         } else {
             var page = parseInt(getUrlParam('page'), 10) || 1;
             if (catTitle) setTextContent(catTitle, 'DANH MỤC: ' + cat.toUpperCase());
@@ -371,6 +385,7 @@ function renderSearchResults(query) {
 
     var results = [];
     var pending = ALL_CATEGORIES.length;
+    var cleanQuery = removeVietnameseTones(query);
 
     function checkDone() {
         if (pending > 0) return;
@@ -382,27 +397,46 @@ function renderSearchResults(query) {
 
         var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
         for (var i = 0; i < results.length; i++) {
-            // Chuẩn hóa toàn bộ thẻ A bên trong Card qua formatUrl
             html += createCardItemHTML(results[i]);
         }
         listContainer.innerHTML = html;
     }
 
-    for (var i = 0; i < ALL_CATEGORIES.length; i++) {
-        fetchJson('data/index/' + ALL_CATEGORIES[i] + '.json', function (data) {
+    function searchInCategory(catName) {
+        fetchJson('data/index/' + catName + '.json', function (data) {
             pending--;
             if (data && data.length) {
                 for (var j = 0; j < data.length; j++) {
                     var item = data[j];
-                    if (item && item.title && item.title.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
-                    } else if (item && item.vendor && item.vendor.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
+                    if (!item) continue;
+
+                    var itemTitle = removeVietnameseTones(item.title || '');
+                    var itemVendor = removeVietnameseTones(item.vendor || '');
+                    var itemId = removeVietnameseTones(item.id || '');
+
+                    if (itemTitle.indexOf(cleanQuery) !== -1 ||
+                        itemVendor.indexOf(cleanQuery) !== -1 ||
+                        itemId.indexOf(cleanQuery) !== -1) {
+
+                        var exists = false;
+                        for (var r = 0; r < results.length; r++) {
+                            if (results[r].id === item.id) {
+                                exists = true;
+                                break;
+                            }
+                        }
+                        if (!exists) {
+                            results.push(item);
+                        }
                     }
                 }
             }
             checkDone();
         });
+    }
+
+    for (var i = 0; i < ALL_CATEGORIES.length; i++) {
+        searchInCategory(ALL_CATEGORIES[i]);
     }
 }
 
@@ -520,15 +554,14 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
 }
 
 /* ==========================================================================
-   8. TỰ ĐỘNG XỬ LÝ EVENT BẤM CLICK & SUBMIT FORM TÌM KIẾM (TRÊN CLOUDFLARE)
+   8. TỰ ĐỘNG XỬ LÝ CLICK LIÊN KẾT & SUBMIT FORM (CHỈ TRÊN CLOUDFLARE)
    ========================================================================== */
 function handleGlobalLinks(e) {
-    if (!IS_CLOUDFLARE) return; // Nếu không phải Cloudflare thì giữ nguyên mặc định
+    if (!IS_CLOUDFLARE) return;
 
     e = e || window.event;
     var target = e.target || e.srcElement;
 
-    // Tìm thẻ <a> gần nhất
     while (target && target.tagName !== 'A') {
         target = target.parentNode;
     }
@@ -536,7 +569,6 @@ function handleGlobalLinks(e) {
     if (target && target.tagName === 'A') {
         var href = target.getAttribute('href');
 
-        // Bỏ qua các link ngoài, link neo (#), javascript, hoặc link download
         if (!href || href.indexOf('http://') === 0 || href.indexOf('https://') === 0 || href.indexOf('#') === 0 || href.indexOf('javascript:') === 0 || target.hasAttribute('download')) {
             return;
         }
@@ -546,14 +578,13 @@ function handleGlobalLinks(e) {
             if (e.preventDefault) {
                 e.preventDefault();
             } else {
-                e.returnValue = false; // Hỗ trợ browser Java / IE cũ
+                e.returnValue = false;
             }
             window.location.href = cleanedUrl;
         }
     }
 }
 
-/* Xử lý Submit Form Tìm Kiếm để cắt đuôi .html trên thanh địa chỉ URL */
 function handleGlobalForms(e) {
     if (!IS_CLOUDFLARE) return;
 
