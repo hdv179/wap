@@ -12,6 +12,6 @@ document.write('<div class="footer">' +
 '<a href="javascript:void(0)" onclick="setTheme(\'dark\')" class="footer__theme-link footer__theme-link--dark">Tối</a>' +
 '</div>' +
 '<div class="footer__copyright">' +
-'&copy; 2026 HDV179 WAP - Kho Game &amp; Ung dung Java Mobile' +
+'&copy; 2026 HDV179 WAP - Kho Game &amp; Ứng dụng Java Mobile' +
 '</div>' +
 '</div>');
