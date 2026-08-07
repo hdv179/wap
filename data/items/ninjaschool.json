@@ -1,0 +1,83 @@
+{
+  "id": "ninjaschool",
+  "title": "Ninja School",
+  "vendor": "TeaMobi",
+  "category": "teamobi",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Bộ ba Ninja School 1, 2, 3 do TeaMobi phát hành là series game nhập vai hành động (ARPG) Offline kinh điển trên nền tảng Java (J2ME), gắn liền với ký ức của thế hệ game thủ sử dụng điện thoại phím bấm. Trò chơi xoay quanh hành trình trưởng thành và chiến đấu của cậu học sinh ninja Oda tại ngôi trường đào tạo ninja Hiroya."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/ninjaschool_1786136633493.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Cốt truyện & Đặc điểm từng phần\n​1. Ninja School 1: Tập Sự Hành Tẩu\n​Nội dung: Cậu học sinh Oda bước vào trường học Ninja Hiroya. Để chứng tỏ bản thân, Oda phải vượt qua các bài kiểm tra rèn luyện thể lực, kỹ năng ẩn nấp và sử dụng nhẫn thuật căn bản dưới sự hướng dẫn của các thầy cô.\n​Lối chơi: Lối chơi cuộn cảnh 2D đơn giản, tập trung vào việc đi cảnh, nhảy nền tảng, đánh quái tích điểm và hoàn thành các nhiệm vụ nhập môn."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/ninjaschool_1786136641087.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "​2. Ninja School 2: Quần Long Tụ Hội\n​Nội dung: Sau khi nắm vững kỹ năng cơ bản, Oda tham gia vào kỳ thi Ninja cấp cao. Cốt truyện mở rộng khi trường học bị tấn công bởi các thế lực phản diện, buộc Oda và các bạn phải lên đường giải cứu ngôi trường.\n​Lối chơi: Bổ sung hệ thống chiêu thức phong phú hơn, nâng cấp trang bị và hệ thống nguyên tố. Đồ họa và hiệu ứng kỹ năng được nâng cấp rõ rệt so với phần 1."
+    },
+    {
+      "type": "text",
+      "value": "​3. Ninja School 3: Dòng Máu Nhẫn Giả\n​Nội dung: Phần kết cho chuỗi game offline. Oda khám phá ra bí mật về thân thế của mình cùng với dòng máu nhẫn giả huyền thoại. Cậu phải đối đầu với trùm cuối mạnh nhất để bảo vệ thế giới ninja khỏi thảm họa diệt vong.\n​Lối chơi: Lối chơi hoàn thiện nhất trong series offline với bản đồ rộng lớn, hệ thống Boss đa dạng, nhiều chuỗi chiêu thức combo đẹp mắt và cơ chế trang bị chuyên sâu."
+    },
+    {
+      "type": "text",
+      "value": "Điểm nổi bật tạo nên thương hiệu\n​Lối chơi nhập vai đi cảnh cuốn hút: Kết hợp hài hòa giữa đánh quái, làm nhiệm vụ, lên cấp (level up) và nâng cấp tiềm năng/kỹ năng cho nhân vật.\n​Vũ khí & Chiêu thức đa dạng: Người dùng có thể sử dụng nhiều loại khí giới đặc trưng như Kiếm, Phi tiêu, Quạt, Kunai với các hiệu ứng nhẫn thuật đẹp mắt.\n​Tối ưu cực tốt: Dung lượng cực nhẹ (chỉ vài trăm KB), hoạt động mượt mà trên hầu hết các dòng điện thoại Java thời bấy giờ (Nokia S40/S60, Sony Ericsson).\n​Tiền đề cho Ninja School Online: Sự thành công rực rỡ của bộ ba phần offline này chính là bước đệm lớn để TeaMobi phát triển phiên bản Ninja School Online (NSO) – một trong những game MMORPG di động sống thọ và thành công nhất tại Việt Nam."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Ninja School 1",
+          "url": "assets/files/NinjaSchool1_Multi_s40_1786136693195.jar",
+          "screen": "Multi",
+          "os": "s40"
+        },
+        {
+          "label": "Ninja School 2",
+          "url": "assets/files/NinjaSchool2_Multi_s40_1786136740986.jar",
+          "screen": "Multi",
+          "os": "s40"
+        },
+        {
+          "label": "Ninja School 3",
+          "url": "assets/files/NinjaSchool3_Multi_s40_1786136777734.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    },
+    {
+      "groupTitle": "BẢN HACK",
+      "files": [
+        {
+          "label": "Ninja School 2 Hack",
+          "url": "assets/files/NinjaSchool2Hack_Multi_s40_1786136848199.jar",
+          "screen": "Multi",
+          "os": "s40"
+        },
+        {
+          "label": "Ninja School 3 Hack",
+          "url": "assets/files/NinjaSchool3Hack_Multi_s40_1786136890783.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
