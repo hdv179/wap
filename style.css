@@ -52,11 +52,189 @@ a:hover { text-decoration: underline; }
     border-bottom: 1px solid var(--primary-dark);
 }
 
+.title-head--split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-head--center {
+    text-align: center;
+    font-size: 13px;
+    padding: 5px 2px;
+}
+
+.title-head__link {
+    color: #fff;
+    font-weight: normal;
+}
+
 .wap-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     padding: 5px;
     margin: 3px;
+}
+
+.wap-card--row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.wap-card__thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.wap-card__content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.wap-card__title {
+    font-weight: bold;
+    color: var(--primary-main);
+}
+
+.wap-card__meta {
+    font-size: 10px;
+    color: var(--text-color);
+    opacity: 0.75;
+}
+
+.wap-card--news {
+    font-size: 11px;
+}
+
+.wap-card__news-item {
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+}
+
+.wap-card__news-link {
+    font-weight: bold;
+}
+
+.wap-card--compact {
+    margin: 3px;
+    padding: 3px;
+}
+
+.wap-card--error {
+    color: red;
+}
+
+.search-form {
+    display: flex;
+    gap: 3px;
+}
+
+.form-control--grow {
+    flex: 1;
+}
+
+.btn--small {
+    padding: 2px 8px;
+}
+
+.pagination {
+    text-align: center;
+    margin: 5px 0;
+}
+
+.search-result-summary {
+    font-size: 10px;
+    padding: 3px;
+    color: #555;
+}
+
+.detail-meta {
+    font-size: 10px;
+    margin-bottom: 5px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 3px;
+}
+
+.detail-text {
+    margin: 4px 0;
+    text-align: justify;
+    line-height: 1.4;
+}
+
+.detail-image-wrap {
+    text-align: center;
+    margin: 6px 0;
+}
+
+.detail-image {
+    max-width: 100%;
+    border: 1px solid var(--border-color);
+}
+
+.detail-image-caption {
+    font-size: 9px;
+}
+
+.nav-menu--center {
+    text-align: center;
+}
+
+.footer {
+    text-align: center;
+    padding: 8px 4px;
+    margin-top: 8px;
+    background: #f1f1f1;
+    border-top: 2px solid #ccc;
+    font-size: 11px;
+}
+
+.footer__nav {
+    margin-bottom: 6px;
+}
+
+.footer__link {
+    font-weight: bold;
+    text-decoration: none;
+    padding: 2px 6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.footer__link--home {
+    color: #007bc4;
+}
+
+.footer__link--top {
+    color: #28a745;
+}
+
+.footer__theme {
+    margin-bottom: 6px;
+    color: #444;
+}
+
+.footer__theme-link {
+    text-decoration: underline;
+}
+
+.footer__theme-link--default { color: #333; }
+.footer__theme-link--blue { color: #007bc4; }
+.footer__theme-link--red { color: #d9534f; }
+.footer__theme-link--dark { color: #555; }
+
+.footer__sep {
+    color: #999;
+}
+
+.footer__copyright {
+    color: #666;
+    font-size: 10px;
+    margin-top: 4px;
 }
 
 /* Button UI */

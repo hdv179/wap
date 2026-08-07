@@ -1,3 +1,8 @@
+const HOME_CATEGORIES = ['gameloft', 'teamobi', 'gameonline', 'gameoffline', 'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 'nhacchuong', 'chude', 'doctruyen', 'thuthuat'];
+const ALL_CATEGORIES = [...HOME_CATEGORIES];
+const JSON_CACHE = new Map();
+const DEFAULT_IMAGE = 'assets/images/default.png';
+
 // Khởi chạy khi DOM đã sẵn sàng
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
@@ -32,14 +37,46 @@ function getUrlParam(param) {
     return new URLSearchParams(window.location.search).get(param);
 }
 
+function fetchJson(url) {
+    const cacheKey = url;
+    if (JSON_CACHE.has(cacheKey)) {
+        return Promise.resolve(JSON_CACHE.get(cacheKey));
+    }
+
+    return fetch(`${url}?v=${Date.now()}`)
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            JSON_CACHE.set(cacheKey, data);
+            return data;
+        });
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Tạo HTML thẻ bài viết dùng chung
 function createCardItemHTML(item) {
+    const title = escapeHtml(item?.title || 'Không có tiêu đề');
+    const thumb = escapeHtml(item?.thumb || DEFAULT_IMAGE);
+    const screen = escapeHtml(item?.screen || 'N/A');
+    const vendor = escapeHtml(item?.vendor || 'N/A');
+    const id = escapeHtml(item?.id || '');
+
     return `
-        <div class="wap-card" style="display:flex; gap:5px; align-items:center;">
-            <img src="${item.thumb || 'assets/images/default.png'}" style="width:36px; height:36px; object-fit:cover; border:1px solid var(--border-color);">
-            <div style="flex:1; overflow:hidden;">
-                <a href="detail.html?id=${item.id}" style="font-weight:bold; color:var(--primary-main);">${item.title || 'Không có tiêu đề'}</a>
-                <div style="font-size:10px; color:#555;">📱 ${item.screen || 'N/A'} | 👤 ${item.vendor || 'N/A'}</div>
+        <div class="wap-card wap-card--row">
+            <img src="${thumb}" alt="${title}" class="wap-card__thumb">
+            <div class="wap-card__content">
+                <a href="detail.html?id=${id}" class="wap-card__title">${title}</a>
+                <div class="wap-card__meta">📱 ${screen} | 👤 ${vendor}</div>
             </div>
         </div>
     `;
@@ -70,13 +107,7 @@ function routePageData() {
     } 
     // 3. Kiểm tra Trang chủ
     else if (document.getElementById('home-gameloft')) {
-        const homeCategories = [
-            'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
-            'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
-            'nhacchuong', 'chude', 'doctruyen', 'thuthuat'
-        ];
-        
-        homeCategories.forEach(catName => {
+        HOME_CATEGORIES.forEach(catName => {
             renderHomeSection(catName, `home-${catName}`, 4);
         });
     }
@@ -87,9 +118,7 @@ function renderHomeSection(cat, containerId, limit = 4) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // Chống cache JSON bằng ?v=timestamp
-    fetch(`data/index/${cat}.json?v=${Date.now()}`)
-        .then(res => res.json())
+    fetchJson(`data/index/${cat}.json`)
         .then(data => {
             if (!data || !data.length) return container.innerHTML = '<div class="wap-card">Đang cập nhật...</div>';
             container.innerHTML = data.slice(0, limit).map(item => createCardItemHTML(item)).join('');
@@ -105,9 +134,7 @@ function renderListPage(cat, page = 1, perPage = 10) {
 
     listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
 
-    // Chống cache JSON bằng ?v=timestamp
-    fetch(`data/index/${cat}.json?v=${Date.now()}`)
-        .then(res => res.json())
+    fetchJson(`data/index/${cat}.json`)
         .then(data => {
             if (!data || !data.length) return listContainer.innerHTML = '<div class="wap-card">Chưa có bài viết nào.</div>';
 
@@ -118,7 +145,7 @@ function renderListPage(cat, page = 1, perPage = 10) {
 
             // Xử lý nút phân trang
             if (paginationContainer && totalPages > 1) {
-                let p2 = '<div style="text-align:center; margin:5px 0;">';
+                let p2 = '<div class="pagination">';
                 if (page > 1) p2 += `<a href="?cat=${cat}&page=${page - 1}" class="btn btn-secondary">« Trước</a> `;
                 p2 += `<span>Trang ${page}/${totalPages}</span>`;
                 if (page < totalPages) p2 += ` <a href="?cat=${cat}&page=${page + 1}" class="btn btn-secondary">Sau »</a>`;
@@ -137,14 +164,8 @@ function renderSearchResults(query) {
     if (paginationContainer) paginationContainer.innerHTML = '';
     listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
 
-    const categories = [
-        'gameloft', 'teamobi', 'gameonline', 'gameoffline', 
-        'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 
-        'nhacchuong', 'chude', 'doctruyen', 'thuthuat'
-    ];
-
     Promise.all(
-        categories.map(cat => fetch(`data/index/${cat}.json?v=${Date.now()}`).then(res => res.ok ? res.json() : []).catch(() => []))
+        ALL_CATEGORIES.map(cat => fetchJson(`data/index/${cat}.json`).catch(() => []))
     ).then(results => {
         const matchedItems = results.flat().filter(item =>
             item.title?.toLowerCase().includes(query) || item.vendor?.toLowerCase().includes(query)
@@ -154,7 +175,7 @@ function renderSearchResults(query) {
             return listContainer.innerHTML = `<div class="wap-card">Không tìm thấy kết quả cho "<b>${query}</b>".</div>`;
         }
 
-        let html = `<div style="font-size:10px; padding:3px; color:#555;">Tìm thấy <b>${matchedItems.length}</b> kết quả:</div>`;
+        let html = `<div class="search-result-summary">Tìm thấy <b>${matchedItems.length}</b> kết quả:</div>`;
         html += matchedItems.map(item => createCardItemHTML(item)).join('');
         listContainer.innerHTML = html;
     });
@@ -167,24 +188,28 @@ function renderDetailPage(id) {
 
     detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
 
-    // Chống cache JSON bằng ?v=timestamp
-    fetch(`data/items/${id}.json?v=${Date.now()}`)
-        .then(res => res.json())
+    fetchJson(`data/items/${id}.json`)
         .then(item => {
+            const title = escapeHtml(item?.title || '').toUpperCase();
+            const vendor = escapeHtml(item?.vendor || 'N/A');
+            const screen = escapeHtml(item?.screen || 'N/A');
+            const version = escapeHtml(item?.version || '1.0');
+            const date = escapeHtml(item?.date || 'N/A');
+
             let html = `
-                <div class="title-head">${(item.title || '').toUpperCase()}</div>
+                <div class="title-head">${title}</div>
                 <div class="wap-card">
-                    <div style="font-size:10px; margin-bottom:5px; border-bottom:1px dashed var(--border-color); padding-bottom:3px;">
-                        📌 <b>Hãng:</b> ${item.vendor || 'N/A'} | 🖥️ <b>Màn hình:</b> ${item.screen || 'N/A'}<br>
-                        🏷️ <b>Phiên bản:</b> ${item.version || '1.0'} | 📅 <b>Cập nhật:</b> ${item.date || 'N/A'}
+                    <div class="detail-meta">
+                        📌 <b>Hãng:</b> ${vendor} | 🖥️ <b>Màn hình:</b> ${screen}<br>
+                        🏷️ <b>Phiên bản:</b> ${version} | 📅 <b>Cập nhật:</b> ${date}
                     </div>
             `;
 
             // Đoạn văn bản & hình ảnh
             if (item.blocks) {
                 item.blocks.forEach(b => {
-                    if (b.type === 'text') html += `<p style="margin:4px 0; text-align: justify; line-height: 1.4;">${b.value.replace(/\n/g, '<br>')}</p>`;
-                    if (b.type === 'image') html += `<div style="text-align:center; margin:6px 0;"><img src="${b.value}" style="max-width:100%; border:1px solid var(--border-color);">${b.caption ? `<div style="font-size:9px;"><i>${b.caption}</i></div>` : ''}</div>`;
+                    if (b.type === 'text') html += `<p class="detail-text">${escapeHtml(b.value || '').replace(/\n/g, '<br>')}</p>`;
+                    if (b.type === 'image') html += `<div class="detail-image-wrap"><img src="${escapeHtml(b.value || '')}" class="detail-image">${b.caption ? `<div class="detail-image-caption"><i>${escapeHtml(b.caption || '')}</i></div>` : ''}</div>`;
                 });
             }
             html += `</div>`;
@@ -202,7 +227,7 @@ function renderDetailPage(id) {
 
             detailContainer.innerHTML = html;
         })
-        .catch(() => detailContainer.innerHTML = '<div class="wap-card" style="color:red;">❌ Bài viết không tồn tại!</div>');
+        .catch(() => detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>');
 }
 
 // --- TIỆN ÍCH UPLOAD GITHUB (ADMIN) --- //
