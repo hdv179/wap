@@ -17,35 +17,7 @@ function parseJson(text) {
     return (new Function('return ' + text))();
 }
 
-// Polyfill JSON.stringify cho trình duyệt Java cũ không có JSON native
-if (!window.JSON) {
-    window.JSON = {};
-}
-if (typeof JSON.stringify !== 'function') {
-    JSON.stringify = function (obj) {
-        var t = typeof obj;
-        if (t !== 'object' || obj === null) {
-            if (t === 'string') {
-                return '"' + obj.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r') + '"';
-            }
-            if (t === 'boolean') return obj ? 'true' : 'false';
-            if (t === 'number') return isFinite(obj) ? String(obj) : 'null';
-            return 'null';
-        }
-        var isArr = Object.prototype.toString.call(obj) === '[object Array]';
-        var json = [], v;
-        for (var k in obj) {
-            if (obj.hasOwnProperty(k)) {
-                v = JSON.stringify(obj[k]);
-                if (v !== null) {
-                    json.push(isArr ? v : '"' + k + '":' + v);
-                }
-            }
-        }
-        return isArr ? '[' + json.join(',') + ']' : '{' + json.join(',') + '}';
-    };
-}
-
+// Khởi chạy khi DOM đã sẵn sàng
 function initApp() {
     if (APP_STARTED) return;
     APP_STARTED = true;
@@ -68,6 +40,8 @@ if (document.addEventListener) {
 window.onload = function () {
     initApp();
 };
+
+// --- QUẢN LÝ GIAO DIỆN & TIỆN ÍCH --- //
 
 function initTheme() {
     var savedTheme = getStoredTheme();
@@ -100,6 +74,7 @@ function saveTheme(themeName) {
             return;
         }
     } catch (e) {
+        // Bỏ qua nếu localStorage không hoạt động
     }
     setCookie('hdv179_theme', themeName, 365);
 }
@@ -217,6 +192,7 @@ function setTextContent(el, text) {
     }
 }
 
+// Tạo HTML thẻ bài viết dùng chung
 function createCardItemHTML(item) {
     var title = escapeHtml(item && item.title ? item.title : 'Không có tiêu đề');
     var thumb = escapeHtml(item && item.thumb ? item.thumb : DEFAULT_IMAGE);
@@ -236,14 +212,18 @@ function createFallbackItemsHTML() {
     return '<div class="wap-card">Không có dữ liệu để hiển thị. Vui lòng kiểm tra file JSON hoặc đường dẫn ảnh.</div>';
 }
 
+// --- BỘ ĐIỀU HƯỚNG VÀ RENDER NỘI DUNG --- //
+
 function routePageData() {
     var cat = getUrlParam('cat') || 'gameloft';
     var id = getUrlParam('id');
     var query = getUrlParam('q');
 
+    // 1. Kiểm tra trang Chi tiết
     if (document.getElementById('post-detail') && id) {
         renderDetailPage(id);
     }
+    // 2. Kiểm tra trang Danh mục / Tìm kiếm
     else if (document.getElementById('post-list')) {
         var catTitle = document.getElementById('category-title');
         if (query) {
@@ -255,6 +235,7 @@ function routePageData() {
             renderListPage(cat, page);
         }
     }
+    // 3. Kiểm tra Trang chủ
     else if (document.getElementById('home-gameloft')) {
         renderHomePage();
     }
@@ -266,6 +247,7 @@ function renderHomePage() {
     }
 }
 
+// Render trang chủ (phần danh mục rút gọn)
 function renderHomeSection(cat, containerId, limit) {
     var container = document.getElementById(containerId);
     if (!container) return;
@@ -290,6 +272,7 @@ function renderHomeSection(cat, containerId, limit) {
     });
 }
 
+// Render danh sách theo chuyên mục + Phân trang
 function renderListPage(cat, page, perPage) {
     var listContainer = document.getElementById('post-list');
     var paginationContainer = document.getElementById('pagination');
@@ -319,6 +302,7 @@ function renderListPage(cat, page, perPage) {
 
         listContainer.innerHTML = html;
 
+        // Xử lý nút phân trang
         if (paginationContainer && totalPages > 1) {
             var p2 = '<div class="pagination">';
             if (page > 1) p2 += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">« Trước</a> ';
@@ -329,6 +313,7 @@ function renderListPage(cat, page, perPage) {
     });
 }
 
+// Render kết quả tìm kiếm trên tất cả danh mục
 function renderSearchResults(query) {
     var listContainer = document.getElementById('post-list');
     var paginationContainer = document.getElementById('pagination');
@@ -373,6 +358,7 @@ function renderSearchResults(query) {
     }
 }
 
+// Render chi tiết bài viết
 function renderDetailPage(id) {
     var detailContainer = document.getElementById('post-detail');
     if (!detailContainer) return;
@@ -393,6 +379,7 @@ function renderDetailPage(id) {
 
         var html = '<div class="title-head">' + title + '</div><div class="wap-card"><div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
 
+        // Đoạn văn bản & hình ảnh
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
                 var block = item.blocks[i];
@@ -411,6 +398,7 @@ function renderDetailPage(id) {
 
         html += '</div>';
 
+        // Danh sách file tải về
         if (item.downloads) {
             for (var i = 0; i < item.downloads.length; i++) {
                 var group = item.downloads[i];
@@ -426,6 +414,8 @@ function renderDetailPage(id) {
         detailContainer.innerHTML = html;
     });
 }
+
+// --- TIỆN ÍCH UPLOAD GITHUB (ADMIN) --- //
 
 function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
     var tokenEl = document.getElementById('gh-token');
