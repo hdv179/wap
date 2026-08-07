@@ -1,0 +1,23 @@
+{
+  "id": "xforce",
+  "title": "X-Force",
+  "vendor": "TeaMobi",
+  "category": "teamobi",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "X-Force",
+          "url": "assets/files/XForce_Multi_s40_1786137748549.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
