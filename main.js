@@ -191,6 +191,10 @@ function createCardItemHTML(item) {
         '</div></div>';
 }
 
+function createFallbackItemsHTML() {
+    return '<div class="wap-card">Không có dữ liệu để hiển thị. Vui lòng kiểm tra file JSON hoặc đường dẫn ảnh.</div>';
+}
+
 // --- BỘ ĐIỀU HƯỚNG VÀ RENDER NỘI DUNG --- //
 
 function routePageData() {
@@ -234,7 +238,7 @@ function renderHomeSection(cat, containerId, limit) {
     container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
     fetchJson('data/index/' + cat + '.json', function (data, err) {
         if (err || !data || !data.length) {
-            container.innerHTML = '<div class="wap-card">Chưa có dữ liệu.</div>';
+            container.innerHTML = createFallbackItemsHTML();
             return;
         }
 
@@ -242,6 +246,10 @@ function renderHomeSection(cat, containerId, limit) {
         var count = Math.min(limit || 4, data.length);
         for (var i = 0; i < count; i++) {
             html += createCardItemHTML(data[i]);
+        }
+        if (!html) {
+            container.innerHTML = createFallbackItemsHTML();
+            return;
         }
         container.innerHTML = html;
     });
@@ -259,7 +267,7 @@ function renderListPage(cat, page, perPage) {
 
     fetchJson('data/index/' + cat + '.json', function (data, err) {
         if (err || !data || !data.length) {
-            listContainer.innerHTML = '<div class="wap-card">Chưa có bài viết nào.</div>';
+            listContainer.innerHTML = createFallbackItemsHTML();
             return;
         }
 
@@ -268,6 +276,11 @@ function renderListPage(cat, page, perPage) {
         var html = '';
         for (var i = 0; i < pageData.length; i++) {
             html += createCardItemHTML(pageData[i]);
+        }
+
+        if (!html) {
+            listContainer.innerHTML = createFallbackItemsHTML();
+            return;
         }
 
         listContainer.innerHTML = html;
