@@ -1,179 +1,100 @@
-var HOME_CATEGORIES = ['gameloft', 'teamobi', 'gameonline', 'gameoffline', 'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 'nhacchuong', 'chude', 'doctruyen', 'thuthuat'];
-var ALL_CATEGORIES = HOME_CATEGORIES.slice(0);
+// WAP JavaScript - Tuong thich trinh duyet Java cu
+// KHONG dung: let/const, arrow functions, template literals, Promise, fetch, Array.forEach, Object.keys
+// Su dung: var, for loop, function, XHR, ActiveXObject fallback
+
+var HOME_CATS = ['gameloft', 'teamobi', 'gameonline', 'gameoffline', 'gameviethoa', 'trinhduyet', 'ungdung', 'hinhnen', 'nhacchuong', 'chude', 'doctruyen', 'thuthuat'];
+var ALL_CATS = HOME_CATS.slice(0);
 var JSON_CACHE = {};
-var DEFAULT_IMAGE = 'assets/images/default.png';
+var DEFAULT_IMG = 'assets/images/default.png';
 var APP_STARTED = false;
 
+// Polyfill String.trim cho trinh duyet cu
 if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/g, '');
     };
 }
 
+// Parse JSON an toan cho ca trinh duyet cu khong co window.JSON
 function parseJson(text) {
-    if (window.JSON && typeof window.JSON.parse === 'function') {
-        return window.JSON.parse(text);
-    }
-    return (new Function('return ' + text))();
-}
-
-// Khởi chạy khi DOM đã sẵn sàng
-function initApp() {
-    if (APP_STARTED) return;
-    APP_STARTED = true;
-    initTheme();
-    loadComponent('header', 'templates/tpl-header.html');
-    loadComponent('footer', 'templates/tpl-footer.html');
-    routePageData();
-}
-
-if (document.addEventListener) {
-    document.addEventListener('DOMContentLoaded', initApp, false);
-} else if (document.attachEvent) {
-    document.attachEvent('onreadystatechange', function () {
-        if (document.readyState === 'complete') {
-            initApp();
-        }
-    });
-}
-
-window.onload = function () {
-    initApp();
-};
-
-// --- QUẢN LÝ GIAO DIỆN & TIỆN ÍCH --- //
-
-function initTheme() {
-    var savedTheme = getStoredTheme();
-    if (!savedTheme) {
-        savedTheme = 'default';
-    }
-    document.documentElement.setAttribute('data-theme', savedTheme);
-}
-
-function setTheme(themeName) {
-    document.documentElement.setAttribute('data-theme', themeName);
-    saveTheme(themeName);
-}
-
-function getStoredTheme() {
     try {
-        if (window.localStorage && window.localStorage.getItem) {
-            return window.localStorage.getItem('hdv179_theme');
+        if (window.JSON && typeof window.JSON.parse === 'function') {
+            return window.JSON.parse(text);
         }
-    } catch (e) {
-        return getCookie('hdv179_theme');
-    }
-    return getCookie('hdv179_theme');
-}
-
-function saveTheme(themeName) {
+    } catch (e) {}
     try {
-        if (window.localStorage && window.localStorage.setItem) {
-            window.localStorage.setItem('hdv179_theme', themeName);
-            return;
-        }
-    } catch (e) {
-        // Bỏ qua nếu localStorage không hoạt động
+        return (new Function('return ' + text))();
+    } catch (e2) {
+        return null;
     }
-    setCookie('hdv179_theme', themeName, 365);
 }
 
-function getCookie(name) {
-    var value = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-    return value ? decodeURIComponent(value[1]) : null;
-}
-
-function setCookie(name, value, days) {
-    var expires = '';
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = '; expires=' + date.toGMTString();
-    }
-    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
-}
-
-function loadComponent(elementId, filePath) {
-    var targetEl = document.getElementById(elementId);
-    if (!targetEl) return;
-
-    loadTextFile(filePath + '?v=' + new Date().getTime(), function (html) {
-        if (html) {
-            targetEl.innerHTML = html;
-        }
-    }, function (err) {
-        if (window.console && console.error) {
-            console.error(err);
-        }
-    });
-}
-
-function getUrlParam(param) {
-    var query = window.location.search || '';
-    var pairs = query.replace(/^\?/, '').split('&');
+// Lay tham so URL
+function getParam(name) {
+    var s = window.location.search || '';
+    var pairs = s.replace(/^\?/, '').split('&');
     for (var i = 0; i < pairs.length; i++) {
-        var parts = pairs[i].split('=');
-        if (parts[0] === param) {
-            return decodeURIComponent(parts[1] || '');
+        var kv = pairs[i].split('=');
+        if (kv[0] === name) {
+            try { return decodeURIComponent(kv[1] || ''); }
+            catch (e) { return kv[1] || ''; }
         }
     }
     return '';
 }
 
-function loadTextFile(url, success, error) {
+// XHR tuong thich IE / Opera Mini / UCWEB
+function loadText(url, ok, fail) {
     var xhr = null;
-    try {
-        xhr = new XMLHttpRequest();
-    } catch (e) {
-        try {
-            xhr = new ActiveXObject('Msxml2.XMLHTTP');
-        } catch (e2) {
-            try {
-                xhr = new ActiveXObject('Microsoft.XMLHTTP');
-            } catch (e3) {
-                if (error) error('XHR not supported');
-                return;
-            }
-        }
+    try { xhr = new XMLHttpRequest(); } catch (e) {}
+    if (!xhr) {
+        try { xhr = new ActiveXObject('Msxml2.XMLHTTP'); } catch (e) {}
     }
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
-                if (success) success(xhr.responseText);
-            } else if (error) {
-                error(xhr.status);
-            }
-        }
-    };
-
-    xhr.open('GET', url, true);
-    xhr.send(null);
-}
-
-function fetchJson(url, callback) {
-    var cacheKey = url;
-    if (JSON_CACHE[cacheKey]) {
-        if (callback) callback(JSON_CACHE[cacheKey]);
+    if (!xhr) {
+        try { xhr = new ActiveXObject('Microsoft.XMLHTTP'); } catch (e) {}
+    }
+    if (!xhr) {
+        if (fail) fail('no-xhr');
         return;
     }
-
-    loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
-        try {
-            var data = parseJson(text);
-            JSON_CACHE[cacheKey] = data;
-            if (callback) callback(data);
-        } catch (e) {
-            if (callback) callback(null, e);
-        }
-    }, function (err) {
-        if (callback) callback(null, err);
-    });
+    try {
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                var s = xhr.status;
+                if (s === 0 || (s >= 200 && s < 300) || s === 304) {
+                    if (ok) ok(xhr.responseText);
+                } else {
+                    if (fail) fail(s);
+                }
+            }
+        };
+        xhr.open('GET', url, true);
+        xhr.send(null);
+    } catch (e2) {
+        if (fail) fail(e2);
+    }
 }
 
-function escapeHtml(value) {
-    return String(value == null ? '' : value)
+// Cache-busting de tranh cache trinh duyet cu
+function noCache(url) {
+    var sep = (url.indexOf('?') >= 0) ? '&' : '?';
+    return url + sep + 'v=' + (new Date()).getTime();
+}
+
+// Tai JSON co cache
+function fetchJson(url, cb) {
+    if (JSON_CACHE[url]) { if (cb) cb(JSON_CACHE[url]); return; }
+    loadText(noCache(url), function (text) {
+        var d = parseJson(text);
+        if (d) JSON_CACHE[url] = d;
+        if (cb) cb(d);
+    }, function () { if (cb) cb(null); });
+}
+
+// Escape HTML
+function esc(v) {
+    if (v == null) return '';
+    return String(v)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -181,294 +102,313 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-function setTextContent(el, text) {
+// Set text an toan
+function setText(el, t) {
     if (!el) return;
-    if (typeof el.textContent !== 'undefined') {
-        el.textContent = text;
-    } else if (typeof el.innerText !== 'undefined') {
-        el.innerText = text;
-    } else {
-        el.innerHTML = escapeHtml(text);
-    }
+    if (typeof el.textContent !== 'undefined') el.textContent = t;
+    else if (typeof el.innerText !== 'undefined') el.innerText = t;
+    else el.innerHTML = esc(t);
 }
 
-// Tạo HTML thẻ bài viết dùng chung
-function createCardItemHTML(item) {
-    var title = escapeHtml(item && item.title ? item.title : 'Không có tiêu đề');
-    var thumb = escapeHtml(item && item.thumb ? item.thumb : DEFAULT_IMAGE);
-    var screen = escapeHtml(item && item.screen ? item.screen : 'N/A');
-    var vendor = escapeHtml(item && item.vendor ? item.vendor : 'N/A');
-    var id = escapeHtml(item && item.id ? item.id : '');
-
-    return '<div class="wap-card wap-card--row">' +
-        '<img src="' + thumb + '" alt="' + title + '" class="wap-card__thumb">' +
-        '<div class="wap-card__content">' +
-        '<a href="detail.html?id=' + id + '" class="wap-card__title">' + title + '</a>' +
-        '<div class="wap-card__meta">📱 ' + screen + ' | 👤 ' + vendor + '</div>' +
+// Tao HTML card 1 muc (co anh thumb)
+function cardHTML(item) {
+    if (!item) return '';
+    var title = esc(item.title || 'Khong co tieu de');
+    var thumb = esc(item.thumb || DEFAULT_IMG);
+    var screen = esc(item.screen || 'N/A');
+    var vendor = esc(item.vendor || 'N/A');
+    var id = esc(item.id || '');
+    return '<div class="wap-card wap-row">' +
+        '<img src="' + thumb + '" alt="' + title + '" class="wap-row-img" width="36" height="36">' +
+        '<div class="wap-row-body">' +
+        '<a href="detail.html?id=' + id + '" class="wap-row-title">' + title + '</a>' +
+        '<div class="wap-row-meta">' + screen + ' | ' + vendor + '</div>' +
         '</div></div>';
 }
 
-function createFallbackItemsHTML() {
-    return '<div class="wap-card">Không có dữ liệu để hiển thị. Vui lòng kiểm tra file JSON hoặc đường dẫn ảnh.</div>';
+// Tao HTML header (inline, khong XHR)
+function renderHeader() {
+    var el = document.getElementById('wap-header');
+    if (!el) return;
+    el.innerHTML =
+        '<div class="site-header">HDV179 WAP PORTAL</div>' +
+        '<div class="nav-menu">' +
+        '<a href="index.html">Trang Chu</a> | ' +
+        '<a href="category.html?cat=gameloft">Gameloft</a> | ' +
+        '<a href="category.html?cat=teamobi">TeaMobi</a> | ' +
+        '<a href="category.html?cat=ungdung">Ung Dung</a>' +
+        '</div>' +
+        '<div class="search-box">' +
+        '<form action="category.html" method="get">' +
+        '<input type="text" name="q" class="search-input" maxlength="80"> ' +
+        '<input type="submit" value="Tim" class="search-btn">' +
+        '</form>' +
+        '</div>';
 }
 
-// --- BỘ ĐIỀU HƯỚNG VÀ RENDER NỘI DUNG --- //
+// Tao HTML footer (inline)
+function renderFooter() {
+    var el = document.getElementById('wap-footer');
+    if (!el) return;
+    el.innerHTML =
+        '<div class="site-footer">' +
+        '<a href="index.html">Trang Chu</a> | ' +
+        '<a href="#top">Len Dau</a>' +
+        '<br>' +
+        'Giao dien: ' +
+        '<a href="javascript:setTheme(\'default\')" style="color:#333">Mac Dinh</a> | ' +
+        '<a href="javascript:setTheme(\'blue\')" style="color:#0066cc">Xanh</a> | ' +
+        '<a href="javascript:setTheme(\'dark\')" style="color:#555">Toi</a>' +
+        '<br>' +
+        '<span style="color:#666">&#169; 2026 HDV179 WAP</span>' +
+        '</div>';
+}
 
-function routePageData() {
-    var cat = getUrlParam('cat') || 'gameloft';
-    var id = getUrlParam('id');
-    var query = getUrlParam('q');
+// --- THEME (luu vao cookie vi khong co localStorage o trinh duyet Java cu) ---
 
-    // 1. Kiểm tra trang Chi tiết
-    if (document.getElementById('post-detail') && id) {
-        renderDetailPage(id);
-    }
-    // 2. Kiểm tra trang Danh mục / Tìm kiếm
-    else if (document.getElementById('post-list')) {
-        var catTitle = document.getElementById('category-title');
-        if (query) {
-            if (catTitle) setTextContent(catTitle, 'TÌM KIẾM: "' + query.toUpperCase() + '"');
-            renderSearchResults(query.trim().toLowerCase());
-        } else {
-            var page = parseInt(getUrlParam('page'), 10) || 1;
-            if (catTitle) setTextContent(catTitle, 'DANH MỤC: ' + cat.toUpperCase());
-            renderListPage(cat, page);
+function getTheme() {
+    try {
+        if (window.localStorage && window.localStorage.getItem) {
+            var t = window.localStorage.getItem('wap_theme');
+            if (t) return t;
         }
+    } catch (e) {}
+    return getCookie('wap_theme') || 'default';
+}
+
+function setTheme(name) {
+    try {
+        if (window.localStorage && window.localStorage.setItem) {
+            window.localStorage.setItem('wap_theme', name);
+        }
+    } catch (e) {}
+    setCookie('wap_theme', name, 365);
+    applyTheme(name);
+}
+
+function applyTheme(name) {
+    // Doi mau body va title-head qua style truc tiep
+    // vi khong dung CSS variables
+    var bg, color, cardBg, border, link, primary, primaryDk;
+    if (name === 'dark') {
+        bg = '#121212'; color = '#e0e0e0'; cardBg = '#1e1e1e';
+        border = '#333333'; link = '#64b5f6'; primary = '#2e7d32'; primaryDk = '#1b5e20';
+    } else if (name === 'blue') {
+        bg = '#ffffff'; color = '#000000'; cardBg = '#f0f5ff';
+        border = '#aaccee'; link = '#0044aa'; primary = '#0066cc'; primaryDk = '#004499';
+    } else {
+        bg = '#ffffff'; color = '#000000'; cardBg = '#f5f5f5';
+        border = '#cccccc'; link = '#0000cc'; primary = '#008000'; primaryDk = '#005500';
     }
-    // 3. Kiểm tra Trang chủ
-    else if (document.getElementById('home-gameloft')) {
-        renderHomePage();
+    var b = document.body;
+    if (b) { b.style.backgroundColor = bg; b.style.color = color; }
+    // Set CSS class on body for theme
+    if (b) { b.className = 'theme-' + name; }
+}
+
+function getCookie(name) {
+    var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+    return m ? decodeURIComponent(m[1]) : '';
+}
+
+function setCookie(name, val, days) {
+    var exp = '';
+    if (days) {
+        var d = new Date();
+        d.setTime(d.getTime() + days * 86400000);
+        exp = '; expires=' + d.toGMTString();
+    }
+    document.cookie = name + '=' + encodeURIComponent(val) + exp + '; path=/';
+}
+
+// --- TRANG CHU ---
+
+function renderHome() {
+    for (var i = 0; i < HOME_CATS.length; i++) {
+        renderHomeSection(HOME_CATS[i]);
     }
 }
 
-function renderHomePage() {
-    for (var i = 0; i < HOME_CATEGORIES.length; i++) {
-        renderHomeSection(HOME_CATEGORIES[i], 'home-' + HOME_CATEGORIES[i], 4);
-    }
-}
-
-// Render trang chủ (phần danh mục rút gọn)
-function renderHomeSection(cat, containerId, limit) {
-    var container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '<div class="wap-card">🔄 Đang tải...</div>';
-    fetchJson('data/index/' + cat + '.json', function (data, err) {
-        if (err || !data || !data.length) {
-            container.innerHTML = createFallbackItemsHTML();
+function renderHomeSection(cat) {
+    var el = document.getElementById('sec-' + cat);
+    if (!el) return;
+    el.innerHTML = '<div class="wap-card msg-loading">Dang tai...</div>';
+    fetchJson('data/index/' + cat + '.json', function (data) {
+        if (!data || !data.length) {
+            el.innerHTML = '<div class="wap-card">Khong co du lieu.</div>';
             return;
         }
-
         var html = '';
-        var count = Math.min(limit || 4, data.length);
-        for (var i = 0; i < count; i++) {
-            html += createCardItemHTML(data[i]);
-        }
-        if (!html) {
-            container.innerHTML = createFallbackItemsHTML();
-            return;
-        }
-        container.innerHTML = html;
+        var n = data.length < 4 ? data.length : 4;
+        for (var j = 0; j < n; j++) html += cardHTML(data[j]);
+        el.innerHTML = html || '<div class="wap-card">Khong co du lieu.</div>';
     });
 }
 
-// Render danh sách theo chuyên mục + Phân trang
-function renderListPage(cat, page, perPage) {
-    var listContainer = document.getElementById('post-list');
-    var paginationContainer = document.getElementById('pagination');
-    if (!listContainer) return;
+// --- TRANG DANH MUC ---
 
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tải danh sách...</div>';
-    page = page || 1;
+function renderList(cat, page, perPage) {
+    var listEl = document.getElementById('post-list');
+    var pageEl = document.getElementById('pagination');
+    if (!listEl) return;
+    page = parseInt(page, 10) || 1;
     perPage = perPage || 10;
-
-    fetchJson('data/index/' + cat + '.json', function (data, err) {
-        if (err || !data || !data.length) {
-            listContainer.innerHTML = createFallbackItemsHTML();
+    listEl.innerHTML = '<div class="wap-card msg-loading">Dang tai danh sach...</div>';
+    fetchJson('data/index/' + cat + '.json', function (data) {
+        if (!data || !data.length) {
+            listEl.innerHTML = '<div class="wap-card">Khong co du lieu.</div>';
             return;
         }
-
-        var totalPages = Math.ceil(data.length / perPage);
-        var pageData = data.slice((page - 1) * perPage, page * perPage);
+        var total = Math.ceil(data.length / perPage);
+        var slice = data.slice((page - 1) * perPage, page * perPage);
         var html = '';
-        for (var i = 0; i < pageData.length; i++) {
-            html += createCardItemHTML(pageData[i]);
-        }
-
-        if (!html) {
-            listContainer.innerHTML = createFallbackItemsHTML();
-            return;
-        }
-
-        listContainer.innerHTML = html;
-
-        // Xử lý nút phân trang
-        if (paginationContainer && totalPages > 1) {
-            var p2 = '<div class="pagination">';
-            if (page > 1) p2 += '<a href="?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-secondary">« Trước</a> ';
-            p2 += '<span>Trang ' + page + '/' + totalPages + '</span>';
-            if (page < totalPages) p2 += ' <a href="?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-secondary">Sau »</a>';
-            paginationContainer.innerHTML = p2 + '</div>';
+        for (var i = 0; i < slice.length; i++) html += cardHTML(slice[i]);
+        listEl.innerHTML = html || '<div class="wap-card">Khong co du lieu.</div>';
+        if (pageEl && total > 1) {
+            var p = '<div class="pagination">';
+            if (page > 1) p += '<a href="category.html?cat=' + cat + '&page=' + (page - 1) + '" class="btn btn-sec">&laquo; Truoc</a> ';
+            p += 'Trang ' + page + '/' + total;
+            if (page < total) p += ' <a href="category.html?cat=' + cat + '&page=' + (page + 1) + '" class="btn btn-sec">Sau &raquo;</a>';
+            pageEl.innerHTML = p + '</div>';
         }
     });
 }
 
-// Render kết quả tìm kiếm trên tất cả danh mục
-function renderSearchResults(query) {
-    var listContainer = document.getElementById('post-list');
-    var paginationContainer = document.getElementById('pagination');
-    if (!listContainer) return;
+// --- TIM KIEM ---
 
-    if (paginationContainer) paginationContainer.innerHTML = '';
-    listContainer.innerHTML = '<div class="wap-card">🔄 Đang tìm kiếm...</div>';
-
+function renderSearch(q) {
+    var listEl = document.getElementById('post-list');
+    var pageEl = document.getElementById('pagination');
+    if (!listEl) return;
+    if (pageEl) pageEl.innerHTML = '';
+    q = q.toLowerCase();
+    listEl.innerHTML = '<div class="wap-card msg-loading">Dang tim kiem...</div>';
     var results = [];
-    var pending = ALL_CATEGORIES.length;
-
+    var pending = ALL_CATS.length;
     function done() {
         if (pending > 0) return;
-
         if (!results.length) {
-            listContainer.innerHTML = '<div class="wap-card">Không tìm thấy kết quả cho "<b>' + query + '</b>".</div>';
+            listEl.innerHTML = '<div class="wap-card msg-error">Khong tim thay ket qua.</div>';
             return;
         }
-
-        var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
-        for (var i = 0; i < results.length; i++) {
-            html += createCardItemHTML(results[i]);
-        }
-        listContainer.innerHTML = html;
+        var html = '<div class="search-summary">Tim thay <b>' + results.length + '</b> ket qua:</div>';
+        for (var k = 0; k < results.length; k++) html += cardHTML(results[k]);
+        listEl.innerHTML = html;
     }
-
-    for (var i = 0; i < ALL_CATEGORIES.length; i++) {
-        fetchJson('data/index/' + ALL_CATEGORIES[i] + '.json', function (data) {
-            pending--;
-            if (data && data.length) {
-                for (var j = 0; j < data.length; j++) {
-                    var item = data[j];
-                    if (item && item.title && item.title.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
-                    } else if (item && item.vendor && item.vendor.toLowerCase().indexOf(query) !== -1) {
-                        results.push(item);
+    for (var i = 0; i < ALL_CATS.length; i++) {
+        (function (cat) {
+            fetchJson('data/index/' + cat + '.json', function (data) {
+                pending--;
+                if (data && data.length) {
+                    for (var j = 0; j < data.length; j++) {
+                        var it = data[j];
+                        if (it && it.title && it.title.toLowerCase().indexOf(q) !== -1) {
+                            results.push(it);
+                        } else if (it && it.vendor && it.vendor.toLowerCase().indexOf(q) !== -1) {
+                            results.push(it);
+                        }
                     }
                 }
-            }
-            done();
-        });
+                done();
+            });
+        })(ALL_CATS[i]);
     }
 }
 
-// Render chi tiết bài viết
-function renderDetailPage(id) {
-    var detailContainer = document.getElementById('post-detail');
-    if (!detailContainer) return;
+// --- TRANG CHI TIET ---
 
-    detailContainer.innerHTML = '<div class="wap-card">🔄 Đang tải bài viết...</div>';
-
-    fetchJson('data/items/' + id + '.json', function (item, err) {
-        if (err || !item) {
-            detailContainer.innerHTML = '<div class="wap-card wap-card--error">❌ Bài viết không tồn tại!</div>';
+function renderDetail(id) {
+    var el = document.getElementById('post-detail');
+    if (!el) return;
+    el.innerHTML = '<div class="wap-card msg-loading">Dang tai bai viet...</div>';
+    fetchJson('data/items/' + id + '.json', function (item) {
+        if (!item) {
+            el.innerHTML = '<div class="wap-card msg-error">Bai viet khong ton tai!</div>';
             return;
         }
+        var html = '<div class="title-head">' + esc((item.title || '').toUpperCase()) + '</div>';
+        html += '<div class="wap-card">';
+        html += '<div class="detail-meta">';
+        html += 'Hang: <b>' + esc(item.vendor || 'N/A') + '</b> | ';
+        html += 'Man hinh: <b>' + esc(item.screen || 'N/A') + '</b><br>';
+        html += 'Phien ban: <b>' + esc(item.version || '1.0') + '</b> | ';
+        html += 'Cap nhat: <b>' + esc(item.date || 'N/A') + '</b>';
+        html += '</div>';
 
-        var title = escapeHtml(item.title || '').toUpperCase();
-        var vendor = escapeHtml(item.vendor || 'N/A');
-        var screen = escapeHtml(item.screen || 'N/A');
-        var version = escapeHtml(item.version || '1.0');
-        var date = escapeHtml(item.date || 'N/A');
-
-        var html = '<div class="title-head">' + title + '</div><div class="wap-card"><div class="detail-meta">📌 <b>Hãng:</b> ' + vendor + ' | 🖥️ <b>Màn hình:</b> ' + screen + '<br>🏷️ <b>Phiên bản:</b> ' + version + ' | 📅 <b>Cập nhật:</b> ' + date + '</div>';
-
-        // Đoạn văn bản & hình ảnh
         if (item.blocks) {
             for (var i = 0; i < item.blocks.length; i++) {
-                var block = item.blocks[i];
-                if (block.type === 'text') {
-                    html += '<p class="detail-text">' + escapeHtml(block.value || '').replace(/\n/g, '<br>') + '</p>';
-                }
-                if (block.type === 'image') {
-                    var imageHtml = '<div class="detail-image-wrap"><img src="' + escapeHtml(block.value || '') + '" class="detail-image">';
-                    if (block.caption) {
-                        imageHtml += '<div class="detail-image-caption"><i>' + escapeHtml(block.caption || '') + '</i></div>';
-                    }
-                    html += imageHtml + '</div>';
+                var bl = item.blocks[i];
+                if (bl.type === 'text') {
+                    html += '<p class="detail-text">' + esc(bl.value || '').replace(/\n/g, '<br>') + '</p>';
+                } else if (bl.type === 'image') {
+                    html += '<div class="detail-img-wrap"><img src="' + esc(bl.value || '') + '" class="detail-img" alt="">';
+                    if (bl.caption) html += '<div class="detail-img-cap">' + esc(bl.caption) + '</div>';
+                    html += '</div>';
                 }
             }
         }
-
         html += '</div>';
 
-        // Danh sách file tải về
         if (item.downloads) {
-            for (var i = 0; i < item.downloads.length; i++) {
-                var group = item.downloads[i];
-                html += '<div class="title-head">📥 ' + (group.groupTitle || '').toUpperCase() + '</div><div class="wap-card">';
-                for (var j = 0; j < group.files.length; j++) {
-                    var fileItem = group.files[j];
-                    html += '<a href="' + fileItem.url + '" class="btn-download" download>💾 ' + fileItem.label + '</a>';
+            for (var d = 0; d < item.downloads.length; d++) {
+                var grp = item.downloads[d];
+                html += '<div class="title-head">TAI VE: ' + esc(grp.groupTitle || '') + '</div>';
+                html += '<div class="wap-card">';
+                for (var f = 0; f < grp.files.length; f++) {
+                    var fi = grp.files[f];
+                    html += '<a href="' + esc(fi.url || '#') + '" class="btn-dl">[TAI] ' + esc(fi.label || fi.url) + '</a>';
                 }
                 html += '</div>';
             }
         }
 
-        detailContainer.innerHTML = html;
+        el.innerHTML = html;
     });
 }
 
-// --- TIỆN ÍCH UPLOAD GITHUB (ADMIN) --- //
+// --- KHOI DONG ---
 
-function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
-    var tokenEl = document.getElementById('gh-token');
-    var repoEl = document.getElementById('gh-repo');
-    var itemIdEl = document.getElementById('game-id');
+function initApp() {
+    if (APP_STARTED) return;
+    APP_STARTED = true;
 
-    var token = tokenEl ? tokenEl.value.trim() : '';
-    var repo = repoEl ? repoEl.value.trim() : '';
-    var itemId = itemIdEl ? itemIdEl.value.trim() : '';
+    applyTheme(getTheme());
+    renderHeader();
+    renderFooter();
 
-    if (!token || !repo) {
-        alert('Thiếu Token hoặc Repo!');
-        return;
+    var cat = getParam('cat') || 'gameloft';
+    var id = getParam('id');
+    var q = getParam('q');
+    var page = getParam('page') || '1';
+
+    // Trang chi tiet
+    if (document.getElementById('post-detail') && id) {
+        renderDetail(id);
     }
-
-    var baseName = customBaseName ? customBaseName.trim() : itemId;
-    if (!baseName) {
-        alert('Vui lòng nhập ID bài viết hoặc Tên file!');
-        return;
+    // Trang danh muc / tim kiem
+    else if (document.getElementById('post-list')) {
+        var titleEl = document.getElementById('cat-title');
+        if (q) {
+            if (titleEl) setText(titleEl, 'TIM KIEM: ' + q.toUpperCase());
+            renderSearch(q.trim());
+        } else {
+            if (titleEl) setText(titleEl, 'DANH MUC: ' + cat.toUpperCase());
+            renderList(cat, page, 10);
+        }
     }
-
-    baseName = baseName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
-    var ext = (fileObj.name || '').split('.').pop().toLowerCase();
-    var fileName = baseName + '-' + new Date().getTime() + '.' + ext;
-    var fullPath = folderPath + '/' + fileName;
-    var apiUrl = 'https://api.github.com/repos/' + repo + '/contents/' + fullPath;
-
-    if (targetInputEl) targetInputEl.value = 'Đang tải lên...';
-
-    if (!window.FileReader) {
-        alert('Trình duyệt này không hỗ trợ đọc file để upload.');
-        return;
+    // Trang chu
+    else if (document.getElementById('sec-gameloft')) {
+        renderHome();
     }
-
-    var reader = new FileReader();
-    reader.onload = function () {
-        var base64Content = reader.result.split(',')[1];
-        var xhr = new XMLHttpRequest();
-        xhr.open('PUT', apiUrl, true);
-        xhr.setRequestHeader('Authorization', 'token ' + token);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    if (targetInputEl) targetInputEl.value = fullPath;
-                    alert('Thành công: ' + fullPath);
-                } else {
-                    if (targetInputEl) targetInputEl.value = '';
-                    alert('Lỗi upload file!');
-                }
-            }
-        };
-        xhr.send(JSON.stringify({ message: 'Upload: ' + fileName, content: base64Content }));
-    };
-    reader.readAsDataURL(fileObj);
 }
+
+// Tuong thich: su dung ca DOMContentLoaded lau onload de khoi dong
+// Tranh khoi dong 2 lan bang APP_STARTED
+if (document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', initApp, false);
+} else if (document.attachEvent) {
+    document.attachEvent('onreadystatechange', function () {
+        if (document.readyState === 'complete') initApp();
+    });
+}
+window.onload = initApp;
