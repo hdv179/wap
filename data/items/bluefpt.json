@@ -1,0 +1,37 @@
+{
+  "id": "bluefpt",
+  "title": "Blue FPT",
+  "vendor": "Medieval Software",
+  "category": "ungdung",
+  "screen": "Multi screen",
+  "version": "1.6",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "BlueFTP (tên đầy đủ: Medieval Bluetooth File Transfer) là một trong những ứng dụng quản lý tệp và truyền dữ liệu qua Bluetooth nổi tiếng nhất trên nền tảng Java (J2ME) dành cho các dòng điện thoại phím bấm cổ điển (như Nokia S40/S60, Sony Ericsson, Motorola...)."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/bluefpt_1786134425004.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Tính năng nổi bật\n​Quản lý tệp đa năng: Thao tác trực tiếp trên bộ nhớ máy và thẻ nhớ (Xem, sao chép, di chuyển, xóa, đổi tên, tạo thư mục mới).\n​Duyệt & truyền tệp qua Bluetooth: Cho phép kết nối với điện thoại khác qua Bluetooth để truy cập, tải xuống hoặc gửi tệp tin từ xa mà không cần dây cáp hay máy tính.\n​Thay đổi thuộc tính tệp: Hỗ trợ xem thông tin chi tiết tệp, chỉnh sửa thuộc tính ẩn (Hidden), chỉ đọc (Read-only)...\n​Hỗ trợ nén & giải nén: Thao tác với các định dạng lưu trữ phổ biến như .zip, .tar, .gz.\n​Giao diện tối ưu: Thiết kế trực quan, dễ thao tác bằng bàn phím số hoặc phím điều hướng."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Blue FPT",
+          "url": "assets/files/BlueFPT_Multi_s40_1786134576785.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
