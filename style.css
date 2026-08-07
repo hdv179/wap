@@ -60,9 +60,23 @@ a:hover { text-decoration: underline; }
 }
 
 .title-head--split {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    zoom: 1;
+}
+.title-head--split:before,
+.title-head--split:after {
+    content: '';
+    display: table;
+}
+.title-head--split:after {
+    clear: both;
+}
+.title-head--split span {
+    float: left;
+}
+.title-head__link {
+    float: right;
+    color: #fff;
+    font-weight: normal;
 }
 
 .title-head--center {
@@ -86,22 +100,30 @@ a:hover { text-decoration: underline; }
 }
 
 .wap-card--row {
-    display: flex;
-    gap: 5px;
-    align-items: center;
+    zoom: 1;
+}
+.wap-card--row:before,
+.wap-card--row:after {
+    content: '';
+    display: table;
+}
+.wap-card--row:after {
+    clear: both;
 }
 
 .wap-card__thumb {
+    float: left;
     width: 36px;
     height: 36px;
-    object-fit: cover;
+    display: block;
+    margin-right: 5px;
     border: 1px solid #cccccc;
     border: 1px solid var(--border-color);
 }
 
 .wap-card__content {
-    flex: 1;
     overflow: hidden;
+    zoom: 1;
 }
 
 .wap-card__title {
@@ -141,12 +163,22 @@ a:hover { text-decoration: underline; }
 }
 
 .search-form {
-    display: flex;
-    gap: 3px;
+    margin: 0;
+}
+
+.search-form input,
+.search-form button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-form button {
+    margin-top: 3px;
 }
 
 .form-control--grow {
-    flex: 1;
+    width: 100%;
 }
 
 .btn--small {
@@ -296,7 +328,16 @@ a:hover { text-decoration: underline; }
     color: #000000;
     color: var(--text-color);
 }
-.upload-box { display: flex; gap: 3px; align-items: center; margin-top: 2px; }
+.upload-box {
+    margin-top: 2px;
+}
+.upload-box > * {
+    display: inline-block;
+    vertical-align: middle;
+}
+.upload-box > * + * {
+    margin-left: 3px;
+}
 .file-input-hidden { display: none; }
 
 /* Thông báo trạng thái */

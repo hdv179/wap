@@ -4,6 +4,19 @@ var JSON_CACHE = {};
 var DEFAULT_IMAGE = 'assets/images/default.png';
 var APP_STARTED = false;
 
+if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+        return this.replace(/^\s+|\s+$/g, '');
+    };
+}
+
+function parseJson(text) {
+    if (window.JSON && typeof window.JSON.parse === 'function') {
+        return window.JSON.parse(text);
+    }
+    return (new Function('return ' + text))();
+}
+
 // Khởi chạy khi DOM đã sẵn sàng
 function initApp() {
     if (APP_STARTED) return;
@@ -123,7 +136,7 @@ function loadTextFile(url, success, error) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 0) {
                 if (success) success(xhr.responseText);
             } else if (error) {
                 error(xhr.status);
@@ -144,7 +157,7 @@ function fetchJson(url, callback) {
 
     loadTextFile(url + '?v=' + new Date().getTime(), function (text) {
         try {
-            var data = JSON.parse(text);
+            var data = parseJson(text);
             JSON_CACHE[cacheKey] = data;
             if (callback) callback(data);
         } catch (e) {
