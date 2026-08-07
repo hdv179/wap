@@ -12,9 +12,56 @@ if (!String.prototype.trim) {
 
 function parseJson(text) {
     if (window.JSON && typeof window.JSON.parse === 'function') {
-        return window.JSON.parse(text);
+        try {
+            return window.JSON.parse(text);
+        } catch (e) {
+            // Bỏ qua và dùng fallback
+        }
     }
     return (new Function('return ' + text))();
+}
+
+function escapeJsonString(value) {
+    return String(value == null ? '' : value)
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n');
+}
+
+function stringifyJson(value) {
+    if (window.JSON && typeof window.JSON.stringify === 'function') {
+        try {
+            return window.JSON.stringify(value);
+        } catch (e) {
+            // Bỏ qua và dùng fallback
+        }
+    }
+
+    if (value && typeof value === 'object') {
+        if (value.message !== undefined && value.content !== undefined) {
+            return '{"message":"' + escapeJsonString(value.message) + '","content":"' + escapeJsonString(value.content) + '"}';
+        }
+    }
+
+    return '';
+}
+
+function getDocumentRoot() {
+    if (document && document.documentElement) {
+        return document.documentElement;
+    }
+    return document && document.body ? document.body : null;
+}
+
+function supportsLocalStorage() {
+    try {
+        if (window.localStorage && window.localStorage.getItem && window.localStorage.setItem) {
+            return true;
+        }
+    } catch (e) {
+        return false;
+    }
+    return false;
 }
 
 // Khởi chạy khi DOM đã sẵn sàng
@@ -48,33 +95,39 @@ function initTheme() {
     if (!savedTheme) {
         savedTheme = 'default';
     }
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    var root = getDocumentRoot();
+    if (root && root.setAttribute) {
+        root.setAttribute('data-theme', savedTheme);
+    }
 }
 
 function setTheme(themeName) {
-    document.documentElement.setAttribute('data-theme', themeName);
+    var root = getDocumentRoot();
+    if (root && root.setAttribute) {
+        root.setAttribute('data-theme', themeName);
+    }
     saveTheme(themeName);
 }
 
 function getStoredTheme() {
-    try {
-        if (window.localStorage && window.localStorage.getItem) {
+    if (supportsLocalStorage()) {
+        try {
             return window.localStorage.getItem('hdv179_theme');
+        } catch (e) {
+            return getCookie('hdv179_theme');
         }
-    } catch (e) {
-        return getCookie('hdv179_theme');
     }
     return getCookie('hdv179_theme');
 }
 
 function saveTheme(themeName) {
-    try {
-        if (window.localStorage && window.localStorage.setItem) {
+    if (supportsLocalStorage()) {
+        try {
             window.localStorage.setItem('hdv179_theme', themeName);
             return;
+        } catch (e) {
+            // Bỏ qua nếu localStorage không hoạt động
         }
-    } catch (e) {
-        // Bỏ qua nếu localStorage không hoạt động
     }
     setCookie('hdv179_theme', themeName, 365);
 }
@@ -97,6 +150,17 @@ function setCookie(name, value, days) {
 function loadComponent(elementId, filePath) {
     var targetEl = document.getElementById(elementId);
     if (!targetEl) return;
+
+    var existingHtml = '';
+    try {
+        existingHtml = targetEl.innerHTML ? targetEl.innerHTML.replace(/\s+/g, '') : '';
+    } catch (e) {
+        existingHtml = '';
+    }
+
+    if (existingHtml) {
+        return;
+    }
 
     loadTextFile(filePath + '?v=' + new Date().getTime(), function (html) {
         if (html) {
@@ -468,7 +532,7 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
                 }
             }
         };
-        xhr.send(JSON.stringify({ message: 'Upload: ' + fileName, content: base64Content }));
+        xhr.send(stringifyJson({ message: 'Upload: ' + fileName, content: base64Content }));
     };
     reader.readAsDataURL(fileObj);
 }
