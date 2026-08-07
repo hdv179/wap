@@ -1,5 +1,12 @@
 [
   {
+    "id": "metalsoldier",
+    "title": "Metal Soldier",
+    "vendor": "TeaMobi",
+    "screen": "Multi screen",
+    "thumb": "assets/images/metalsoldier_1786138082158.png"
+  },
+  {
     "id": "xforce",
     "title": "X-Force",
     "vendor": "TeaMobi",
