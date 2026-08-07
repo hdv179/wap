@@ -1,4 +1,4 @@
-document.write('<div class="title-head title-head--center"><a href="index.html">HDV179 WAP</a></div>' +
+document.write('<div class="title-head title-head--center"><a href="index.html" style="color: inherit; text-decoration: none;">HDV179 WAP</a></div>' +
 '<div class="nav-menu nav-menu--center">' +
 '<a href="category.html?cat=gameloft">Gameloft</a> | ' +
 '<a href="category.html?cat=teamobi">TeaMobi</a> | ' +
