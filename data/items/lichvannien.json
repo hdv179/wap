@@ -1,0 +1,42 @@
+{
+  "id": "lichvannien",
+  "title": "Lịch Vạn Niên",
+  "vendor": "Wind Soft",
+  "category": "ungdung",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Lịch Vạn Niên là ứng dụng tra cứu lịch âm dương và tử vi phong thủy truyền thống được phát triển bởi Wind Soft dành cho các dòng điện thoại di động sử dụng nền tảng Java (J2ME) trước đây."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/lichvannien_1786135393559.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Tính năng chính\n​Tra cứu Lịch Âm - Dương: Xem thông tin ngày, tháng, năm theo cả lịch Âm và lịch Dương song song một cách chuẩn xác.\n​Thông tin Can Chi & Giờ Hoàng Đạo: Cung cấp chi tiết Can Chi của ngày/tháng/năm, danh sách giờ Hoàng Đạo, Hắc Đạo trong ngày để người dùng dễ dàng chọn thời điểm tốt.\n​Hướng xuất hành & Việc nên/kiêng làm: Tra cứu hướng tốt cho việc xuất hành, xem ngày tốt xấu để thực hiện các công việc quan trọng (khai trương, cưới hỏi, động thổ, v.v.).\n​Giao diện thuần Việt: Thiết kế tối ưu, gọn nhẹ và dễ dàng thao tác trên màn hình điện thoại phím bấm cổ điển."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/lichvannien_1786135401972.png",
+      "caption": ""
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Lịch Vạn Niên",
+          "url": "assets/files/LichVanNien_Multi_s40_1786135363062.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
