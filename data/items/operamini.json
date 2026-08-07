@@ -1,0 +1,46 @@
+{
+  "id": "operamini",
+  "title": "Opera Mini",
+  "vendor": "Opera",
+  "category": "trinhduyet",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "7/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Opera Mini là một trong những trình duyệt web phổ biến nhất thế giới với khả năng tương thích cao trên hầu hết mọi dòng điện thoại. Tốc độ tải trang và chuyển tab được tối ưu vượt trội, duy trì sự mượt mà ngay cả khi kết nối internet chập chờn."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/operamini_1786079852250.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Dành cho người dùng mạng trả trước hoặc khu vực có tốc độ kết nối chậm, Opera Mini hỗ trợ nén và giảm mức tiêu thụ dữ liệu lên đến 90% so với các trình duyệt thông thường. Điều này mang lại trải nghiệm truy cập internet vừa nhanh chóng, vừa tối ưu chi phí sử dụng cước phí di động."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/operamini_1786079855936.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Ở các phiên bản nâng cấp, trình quản lý tải xuống của Opera Mini cho phép bạn linh hoạt bắt đầu, tạm dừng hoặc tiếp tục quá trình tải tệp giữa các phiên duyệt web. Người dùng có thể dễ dàng lựa chọn và tải các phiên bản Opera Mini phù hợp với thiết bị của mình."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Opera Mini",
+          "url": "assets/files/OperaMini_Multi_s40_1786079890263.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
