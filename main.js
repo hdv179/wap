@@ -446,10 +446,10 @@ function renderDetailPage(id) {
         if (item.downloads) {
             for (var j = 0; j < item.downloads.length; j++) {
                 var group = item.downloads[j];
-                html += '<div class="title-head">📥 ' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card">';
+                html += '<div class="title-head">' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card">';
                 for (var k = 0; k < group.files.length; k++) {
                     var fileItem = group.files[k];
-                    html += '<a href="' + escapeHtml(fileItem.url) + '" class="btn-download" download>💾 ' + escapeHtml(fileItem.label) + '</a>';
+                    html += '<a href="' + escapeHtml(fileItem.url) + '" class="btn-download" download>' + escapeHtml(fileItem.label) + '</a>';
                 }
                 html += '</div>';
             }
