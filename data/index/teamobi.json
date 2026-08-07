@@ -1,5 +1,12 @@
 [
   {
+    "id": "ninjaschool",
+    "title": "Ninja School",
+    "vendor": "TeaMobi",
+    "screen": "Multi screen",
+    "thumb": "assets/images/ninjaschool_1786136633493.png"
+  },
+  {
     "id": "avatarplus",
     "title": "Avatar Plus",
     "vendor": "TeaMobi",
