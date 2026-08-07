@@ -3,9 +3,9 @@
   "title": "Avatar Plus",
   "vendor": "TeaMobi",
   "category": "teamobi",
-  "screen": "Multi Screen",
+  "screen": "",
   "version": "2.5.0",
-  "date": "7/8/2026",
+  "date": "8/8/2026",
   "blocks": [
     {
       "type": "text",
@@ -44,8 +44,20 @@
       "groupTitle": "TẢI VỀ",
       "files": [
         {
-          "label": "Avartar Plus",
+          "label": "Avartar Plus v250",
           "url": "assets/files/AvatarPlus_Multi_s40_1786073409408.jar",
+          "screen": "Multi",
+          "os": "s40"
+        },
+        {
+          "label": "Avartar Plus v258",
+          "url": "assets/files/AvatarPlus258_Multi_s40_1786129417245.jar",
+          "screen": "Multi",
+          "os": "s40"
+        },
+        {
+          "label": "Avatar HP v7",
+          "url": "assets/files/AvatarHP_Multi_s40_1786129456832.jar",
           "screen": "Multi",
           "os": "s40"
         }
