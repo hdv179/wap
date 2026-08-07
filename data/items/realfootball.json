@@ -5,7 +5,7 @@
   "category": "gameloft",
   "screen": "Multi screen",
   "version": "1.0",
-  "date": "6/8/2026",
+  "date": "7/8/2026",
   "blocks": [
     {
       "type": "text",
@@ -27,11 +27,7 @@
     },
     {
       "type": "text",
-      "value": "Chế Độ Chơi Đa Dạng, Chuẩn Bóng Đá:\nClub & National Cups: Thi đấu trọn vẹn các giải VĐQG lớn, Champions League và World Cup.\nEnter the Legend: Nhập vai một cầu thủ trẻ, tự nâng cấp chỉ số và leo lên đỉnh cao sự nghiệp (tương tự Be a Pro của FIFA hay Become a Legend của PES).\nClub Master: Thử sức làm quản lý bóng đá, mua bán chuyển nhượng và xây dựng đội hình dream team.\nHistoric Challenges: Tái hiện và lật ngược thế cờ trong các trận cầu kinh điển lịch sử.\nNối Mạng Bluetooth Đỉnh Cao: Tính năng kết nối 2 máy qua Bluetooth để \"sát phạt\" cùng bạn bè từng là lý do khiến bao giờ ra chơi học sinh lại tụ tập nín thở theo dõi từng pha bóng.\nThao Tác Bàn Phím Đơn Giản Nhưng Đầy Kỹ Thuật: Lối chơi xoay quanh các phím bấm cơ bản (2-4-6-8 để di chuyển, 5 để chuyền/tắc bóng, 0 hoặc phím mềm để sút). Game cũng sở hữu những \"mẹo\" huyền thoại như góc sút phạt ăn bàn tuyệt đối hay bấm chuyền hết lực để ghi bàn."
-    },
-    {
-      "type": "text",
-      "value": "Real Football Java không chỉ đơn thuần là một trò chơi giải trí, mà còn là một phần ký ức tuổi thơ tươi đẹp — thời kỳ mà chỉ cần một chiếc điện thoại phím bấm và vài chục KB dung lượng game cũng đủ đem lại những giờ phút cuồng nhiệt quên ăn quên ngủ."
+      "value": "Chế Độ Chơi Đa Dạng, Chuẩn Bóng Đá:\nClub & National Cups: Thi đấu trọn vẹn các giải VĐQG lớn, Champions League và World Cup.\nEnter the Legend: Nhập vai một cầu thủ trẻ, tự nâng cấp chỉ số và leo lên đỉnh cao sự nghiệp (tương tự Be a Pro của FIFA hay Become a Legend của PES).\nClub Master: Thử sức làm quản lý bóng đá, mua bán chuyển nhượng và xây dựng đội hình dream team.\nHistoric Challenges: Tái hiện và lật ngược thế cờ trong các trận cầu kinh điển lịch sử.\nNối Mạng Bluetooth Đỉnh Cao: Tính năng kết nối 2 máy qua Bluetooth để \"sát phạt\" cùng bạn bè từng là lý do khiến bao giờ ra chơi học sinh lại tụ tập nín thở theo dõi từng pha bóng.\nThao Tác Bàn Phím Đơn Giản Nhưng Đầy Kỹ Thuật: Lối chơi xoay quanh các phím bấm cơ bản (2-4-6-8 để di chuyển, 5 để chuyền/tắc bóng, 0 hoặc phím mềm để sút). Game cũng sở hữu những \"mẹo\" huyền thoại như góc sút phạt ăn bàn tuyệt đối hay bấm chuyền hết lực để ghi bàn.\nReal Football Java không chỉ đơn thuần là một trò chơi giải trí, mà còn là một phần ký ức tuổi thơ tươi đẹp — thời kỳ mà chỉ cần một chiếc điện thoại phím bấm và vài chục KB dung lượng game cũng đủ đem lại những giờ phút cuồng nhiệt quên ăn quên ngủ."
     }
   ],
   "downloads": [
@@ -40,11 +36,15 @@
       "files": [
         {
           "label": "Real Football 2012 240x320",
-          "url": "assets/files/realfootball2012_240x320_s40.jar"
+          "url": "assets/files/realfootball2012_240x320_s40.jar",
+          "screen": "Multi",
+          "os": "s40"
         },
         {
           "label": "Real Football 2012 320x240",
-          "url": "assets/files/realfootball2012_320x240_s40.jar"
+          "url": "assets/files/realfootball2012_320x240_s40.jar",
+          "screen": "Multi",
+          "os": "s40"
         }
       ]
     }
