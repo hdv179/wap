@@ -1,0 +1,33 @@
+{
+  "id": "cotuong",
+  "title": "Cờ Tướng",
+  "vendor": "TeaMobi",
+  "category": "teamobi",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Cờ Tướng TeaMobi (thường gọi là Cờ Tướng Online hoặc nằm trong cụm trò chơi dân gian của TeaMobi) là một trong những tựa game đấu trí trực tuyến phổ biến trên nền tảng di động thời kỳ Java (J2ME) và giai đoạn đầu của smartphone."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/cotuong_1786137267371.png",
+      "caption": ""
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Cờ Tướng",
+          "url": "assets/files/CoTuong_Multi_s40_1786137307242.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
