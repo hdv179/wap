@@ -1,4 +1,7 @@
-document.write('<div class="title-head title-head--center"><a href="index.html" style="color: inherit; text-decoration: none;">HDV179 WAP</a></div>' +
+document.write('<div class="title-head title-head--center">' +
+'<a href="index.html" style="color: inherit; text-decoration: none;">HDV179 WAP</a>' +
+'<div style="margin-top: 5px;"><img src="assets/images/HDV179WAP.png" alt="Logo" style="max-width: 120px; height: auto; display: inline-block;" /></div>' +
+'</div>' +
 '<div class="nav-menu nav-menu--center">' +
 '<a href="category.html?cat=gameloft">Gameloft</a> | ' +
 '<a href="category.html?cat=teamobi">TeaMobi</a> | ' +
