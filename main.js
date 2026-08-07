@@ -517,3 +517,45 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
     };
     reader.readAsDataURL(fileObj);
 }
+
+/* ==========================================================================
+   8. TỰ ĐỘNG XỬ LÝ CLICK CHO TẤT CẢ LIÊN KẾT (CHỈ TRÊN CLOUDFLARE)
+   ========================================================================== */
+function handleGlobalLinks(e) {
+    if (!IS_CLOUDFLARE) return; // Nếu không phải Cloudflare thì giữ nguyên mặc định
+
+    e = e || window.event;
+    var target = e.target || e.srcElement;
+
+    // Tìm thẻ <a> gần nhất (phòng trường hợp bấm vào <img> hoặc <span> bên trong <a>)
+    while (target && target.tagName !== 'A') {
+        target = target.parentNode;
+    }
+
+    if (target && target.tagName === 'A') {
+        var href = target.getAttribute('href');
+
+        // Bỏ qua các link ngoài, link neo (#), javascript, hoặc link download
+        if (!href || href.indexOf('http://') === 0 || href.indexOf('https://') === 0 || href.indexOf('#') === 0 || href.indexOf('javascript:') === 0 || target.hasAttribute('download')) {
+            return;
+        }
+
+        var cleanedUrl = stripHtmlExtension(href);
+        if (cleanedUrl !== href) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            } else {
+                e.returnValue = false; // Hỗ trợ browser Java / IE cũ
+            }
+            window.location.href = cleanedUrl;
+        }
+    }
+}
+
+// Lắng nghe sự kiện click trên toàn bộ document
+if (document.addEventListener) {
+    document.addEventListener('click', handleGlobalLinks, false);
+} else if (document.attachEvent) {
+    document.attachEvent('onclick', handleGlobalLinks);
+}
+
