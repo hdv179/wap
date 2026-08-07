@@ -105,10 +105,21 @@ a:hover { text-decoration: underline; }
 [data-theme="red"] .title-head, [data-theme="red"] .btn { background-color: #cc0000; border-color: #990000; }
 [data-theme="red"] .wap-card__title, [data-theme="red"] .btn-download { color: #cc0000 !important; }
 
-[data-theme="dark"] { background-color: #121212; color: #e0e0e0; border-color: #333333; }
-[data-theme="dark"] .wap-card, [data-theme="dark"] .nav-menu { background-color: #1e1e1e; border-color: #333333; }
-[data-theme="dark"] .title-head { background-color: #2e7d32; border-color: #1b5e20; }
-[data-theme="dark"] .wap-card__title, [data-theme="dark"] .btn-download { color: #2e7d32 !important; }
+/* DARK THEME FIXES */
+[data-theme="dark"], 
+[data-theme="dark"] body { background-color: #121212; color: #e0e0e0; border-color: #333333; }
+[data-theme="dark"] .wap-card, 
+[data-theme="dark"] .nav-menu,
+[data-theme="dark"] .footer { background-color: #1e1e1e; border-color: #333333; color: #e0e0e0; }
+[data-theme="dark"] .title-head { background-color: #2e7d32; border-color: #1b5e20; color: #ffffff; }
+[data-theme="dark"] .wap-card__title, 
+[data-theme="dark"] .btn-download { color: #81c784 !important; } /* Chuyển sang xanh lá sáng để nổi bật trên nền tối */
 [data-theme="dark"] a { color: #64b5f6; }
-[data-theme="dark"] .wap-card__meta { color: #e0e0e0; }
-[data-theme="dark"] .form-control { background-color: #121212; color: #e0e0e0; border-color: #333333; }
+[data-theme="dark"] .wap-card__meta { color: #aaaaaa; opacity: 1; }
+[data-theme="dark"] .form-control { background-color: #2a2a2a; color: #ffffff; border-color: #444444; }
+[data-theme="dark"] .footer__link { background-color: #2a2a2a; border-color: #444444; color: #64b5f6; }
+[data-theme="dark"] .footer__theme, 
+[data-theme="dark"] .footer__copyright, 
+[data-theme="dark"] .search-result-summary, 
+[data-theme="dark"] .footer__sep { color: #aaaaaa; }
+[data-theme="dark"] .footer__theme-link--default { color: #cccccc; }
