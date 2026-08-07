@@ -1,0 +1,37 @@
+{
+  "id": "metalsoldier",
+  "title": "Metal Soldier",
+  "vendor": "TeaMobi",
+  "category": "teamobi",
+  "screen": "Multi screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Metal Soldier (tên đầy đủ thường gọi là Metal Soldier: Super Commando) là một tựa game nhập vai bắn súng đi cảnh 2D màn hình ngang cực kỳ quen thuộc trên hệ máy Java (J2ME) thời xưa. Trò chơi lấy cảm hứng mạnh mẽ từ huyền thoại Metal Slug (Rambo Lùn) trên máy xẻng."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/metalsoldier_1786138082158.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Lối chơi & Tính năng nổi bật\n​Phong cách Rambo Lùn: Người chơi nhập vai một chiến binh tinh nhuệ đột kích vào căn cứ địch, xả súng tiêu diệt bộ binh, xe tăng, trực thuộc và vượt qua các chướng ngại vật.\n​Kho vũ khí đa dạng:\n​Súng căn bản (đạn vô hạn).\n​Súng hạng nặng nhặt trên đường đi: Súng đạn chùm (Spread Shot), súng lửa (Flame Thrower), súng Rocket (Rocket Launcher), lựu đạn.\n​Phương tiện chiến đấu: Ở một số phân cảnh, người chơi có thể leo lên điều khiển xe tăng hoặc máy bay chiến đấu để càn quét kẻ địch.\n​Đấu Boss hoành tráng: Cuối mỗi màn chơi thường xuất hiện các cỗ máy chiến tranh khổng lồ với lượng máu lớn và đạn dày đặc, đòi hỏi kỹ năng né đạn tốt.\n​Đồ họa Pixel nhẹ nhàng: Tạo hình nhân vật Chibi hủm hỉnh nhưng các hiệu ứng cháy nổ lại rất sinh động, vận hành mượt mà trên cả các máy Java cấu hình thấp."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Metal Soldier",
+          "url": "assets/files/MetalSoldier_Multi_s40_1786138144858.jar",
+          "screen": "Multi",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
