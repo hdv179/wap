@@ -78,19 +78,24 @@ function initApp() {
 function handlePathRedirect() {
     var path = window.location.pathname || '';
     var search = window.location.search || '';
+    var href = window.location.href || '';
 
     if (!path) return;
 
     if (path === '/detail' || path === '/detail/' || path === '/category' || path === '/category/') {
         var target = path.replace(/\/$/, '') + '.html' + search;
-        if (window.location.href.indexOf(target) === -1) {
+        if (href.indexOf(target) === -1) {
             window.location.replace(target);
         }
     }
 }
 
 if (document.addEventListener) {
-    document.addEventListener('DOMContentLoaded', initApp, false);
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initApp();
+    } else {
+        document.addEventListener('DOMContentLoaded', initApp, false);
+    }
 } else if (document.attachEvent) {
     document.attachEvent('onreadystatechange', function () {
         if (document.readyState === 'complete') {
@@ -98,10 +103,6 @@ if (document.addEventListener) {
         }
     });
 }
-
-window.onload = function () {
-    initApp();
-};
 
 // --- QUẢN LÝ GIAO DIỆN & TIỆN ÍCH --- //
 
