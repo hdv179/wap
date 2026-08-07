@@ -348,12 +348,12 @@ function renderListPage(cat, page, perPage) {
         if (paginationContainer && totalPages > 1) {
             var nav = '<div class="pagination">';
             if (page > 1) {
-                var prevUrl = formatUrl('?cat=' + cat + '&page=' + (page - 1));
+                var prevUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page - 1));
                 nav += '<a href="' + prevUrl + '" class="btn btn-secondary">« Trước</a> ';
             }
             nav += '<span>Trang ' + page + '/' + totalPages + '</span>';
             if (page < totalPages) {
-                var nextUrl = formatUrl('?cat=' + cat + '&page=' + (page + 1));
+                var nextUrl = formatUrl('index.html?cat=' + cat + '&page=' + (page + 1));
                 nav += ' <a href="' + nextUrl + '" class="btn btn-secondary">Sau »</a>';
             }
             paginationContainer.innerHTML = nav + '</div>';
@@ -382,6 +382,7 @@ function renderSearchResults(query) {
 
         var html = '<div class="search-result-summary">Tìm thấy <b>' + results.length + '</b> kết quả:</div>';
         for (var i = 0; i < results.length; i++) {
+            // Chuẩn hóa toàn bộ thẻ A bên trong Card qua formatUrl
             html += createCardItemHTML(results[i]);
         }
         listContainer.innerHTML = html;
@@ -519,7 +520,7 @@ function uploadToGitHub(fileObj, folderPath, customBaseName, targetInputEl) {
 }
 
 /* ==========================================================================
-   8. TỰ ĐỘNG XỬ LÝ CLICK CHO TẤT CẢ LIÊN KẾT (CHỈ TRÊN CLOUDFLARE)
+   8. TỰ ĐỘNG XỬ LÝ EVENT BẤM CLICK & SUBMIT FORM TÌM KIẾM (TRÊN CLOUDFLARE)
    ========================================================================== */
 function handleGlobalLinks(e) {
     if (!IS_CLOUDFLARE) return; // Nếu không phải Cloudflare thì giữ nguyên mặc định
@@ -527,7 +528,7 @@ function handleGlobalLinks(e) {
     e = e || window.event;
     var target = e.target || e.srcElement;
 
-    // Tìm thẻ <a> gần nhất (phòng trường hợp bấm vào <img> hoặc <span> bên trong <a>)
+    // Tìm thẻ <a> gần nhất
     while (target && target.tagName !== 'A') {
         target = target.parentNode;
     }
@@ -552,10 +553,27 @@ function handleGlobalLinks(e) {
     }
 }
 
-// Lắng nghe sự kiện click trên toàn bộ document
-if (document.addEventListener) {
-    document.addEventListener('click', handleGlobalLinks, false);
-} else if (document.attachEvent) {
-    document.attachEvent('onclick', handleGlobalLinks);
+/* Xử lý Submit Form Tìm Kiếm để cắt đuôi .html trên thanh địa chỉ URL */
+function handleGlobalForms(e) {
+    if (!IS_CLOUDFLARE) return;
+
+    e = e || window.event;
+    var target = e.target || e.srcElement;
+
+    if (target && target.tagName === 'FORM') {
+        var action = target.getAttribute('action') || '';
+        if (action.indexOf('.html') !== -1) {
+            var cleanedAction = stripHtmlExtension(action);
+            target.setAttribute('action', cleanedAction);
+        }
+    }
 }
 
+// Lắng nghe sự kiện click & submit trên toàn bộ document
+if (document.addEventListener) {
+    document.addEventListener('click', handleGlobalLinks, false);
+    document.addEventListener('submit', handleGlobalForms, false);
+} else if (document.attachEvent) {
+    document.attachEvent('onclick', handleGlobalLinks);
+    document.attachEvent('onsubmit', handleGlobalForms);
+}
