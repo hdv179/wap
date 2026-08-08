@@ -3,7 +3,7 @@
   "title": "Real Football 2014",
   "vendor": "GameLoft SA",
   "category": "gameloft",
-  "screen": "Multi screen",
+  "screen": "Multi Screen",
   "version": "1.0",
   "date": "8/8/2026",
   "blocks": [
@@ -75,7 +75,7 @@
         },
         {
           "label": "Real Football 2014",
-          "url": "assets/files/RealFootball2014_240x400_s40_1786189700004.jar",
+          "url": "assets/files/RealFootball2014_240x400_s40_1786190777274.jar",
           "screen": "240x400",
           "os": "s40"
         },
