@@ -1,0 +1,94 @@
+{
+  "id": "realfootball2013",
+  "title": "Real Football 2013",
+  "vendor": "GameLoft SA",
+  "category": "gameloft",
+  "screen": "",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Nói đến ký ức game mobile thời bàn phím bấm (T9), Real Football (hay Real Soccer) từ nhà phát triển Gameloft chính là tượng đài bất tử trong lòng thế hệ 8X, 9X. Khi những chiếc điện thoại Nokia, Sony Ericsson hay Samsung màn hình 240x320 còn thống trị, tựa game này đã mang cả bầu không khí cuồng nhiệt của bóng đá đỉnh cao vào trong tầm tay người chơi."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/realfootball-1786013774073.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Đồ Họa & Chuyển Động Vượt Tầm Đòn Bẩy: Dù hạn chế bởi nền tảng Java 2D/3D nhẹ hều, Gameloft vẫn tái hiện chi tiết từng dáng chạy, cú xoạc bóng hay các pha ăn mừng. Hình ảnh các danh thủ danh tiếng (được mua bản quyền FIFPro thời kỳ 2007–2013) luôn mang lại cảm giác vô cùng chân thực."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/realfootball-1786013810783.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Chế Độ Chơi Đa Dạng, Chuẩn Bóng Đá:\nClub & National Cups: Thi đấu trọn vẹn các giải VĐQG lớn, Champions League và World Cup.\nEnter the Legend: Nhập vai một cầu thủ trẻ, tự nâng cấp chỉ số và leo lên đỉnh cao sự nghiệp (tương tự Be a Pro của FIFA hay Become a Legend của PES).\nClub Master: Thử sức làm quản lý bóng đá, mua bán chuyển nhượng và xây dựng đội hình dream team.\nHistoric Challenges: Tái hiện và lật ngược thế cờ trong các trận cầu kinh điển lịch sử.\nNối Mạng Bluetooth Đỉnh Cao: Tính năng kết nối 2 máy qua Bluetooth để \"sát phạt\" cùng bạn bè từng là lý do khiến bao giờ ra chơi học sinh lại tụ tập nín thở theo dõi từng pha bóng.\nThao Tác Bàn Phím Đơn Giản Nhưng Đầy Kỹ Thuật: Lối chơi xoay quanh các phím bấm cơ bản (2-4-6-8 để di chuyển, 5 để chuyền/tắc bóng, 0 hoặc phím mềm để sút). Game cũng sở hữu những \"mẹo\" huyền thoại như góc sút phạt ăn bàn tuyệt đối hay bấm chuyền hết lực để ghi bàn.\nReal Football Java không chỉ đơn thuần là một trò chơi giải trí, mà còn là một phần ký ức tuổi thơ tươi đẹp — thời kỳ mà chỉ cần một chiếc điện thoại phím bấm và vài chục KB dung lượng game cũng đủ đem lại những giờ phút cuồng nhiệt quên ăn quên ngủ."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_128x128_s40_1786186599268.jar",
+          "screen": "128x128",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_128x160_s40_1786186641502.jar",
+          "screen": "128x160",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_176x208_s40_1786186674437.jar",
+          "screen": "176x208",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_176x220_s40_1786186955882.jar",
+          "screen": "176x220",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_240x320_s40_1786186844584.jar",
+          "screen": "240x320",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_240x320_s60_1786187132794.jar",
+          "screen": "240x320",
+          "os": "s60"
+        },
+        {
+          "label": "Real Football 2013 TS",
+          "url": "assets/files/RealFootball2013TS_240x320_s40_1786187216177.jar",
+          "screen": "240x320",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_320x240_s40_1786187253449.jar",
+          "screen": "320x240",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_360x640_s40_1786187294760.jar",
+          "screen": "360x640",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
