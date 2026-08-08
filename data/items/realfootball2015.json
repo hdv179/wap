@@ -1,0 +1,109 @@
+{
+  "id": "realfootball2015",
+  "title": "Real Football 2015",
+  "vendor": "GameLoft SA",
+  "category": "gameloft",
+  "screen": "Multi Screen",
+  "version": "1.0",
+  "date": "8/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Real Football 2013 là tựa game kết hợp giữa thi đấu bóng đá và quản lý đội bóng đầy lôi cuốn đến từ nhà phát hành Gameloft, sở hữu đồ họa và giao diện được tối ưu hóa cho các thiết bị di động. Game tái hiện không khí sân cỏ chân thực với hình ảnh rõ nét và các chuyển động đi bóng mượt mà."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/realfootball2013_1786189812734.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Điểm đặc sắc của trò chơi nằm ở khả năng chiêu mộ những siêu sao hàng đầu thế giới như Falcao, Cristiano Ronaldo hay Messi về chung một đội hình. Bạn sẽ giữ vai trò người chiến lược gia tối cao, tự tay sắp xếp đội hình và dẫn dắt các ngôi sao thi đấu trên sân."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/realfootball2013_1786189862327.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Sau mỗi chiến thắng, người chơi sẽ nhận được tiền thưởng để chi trả cho các hoạt động nâng cấp chỉ số hoặc mua sắm cầu thủ chất lượng hơn, từ đó nâng cao trải nghiệm làm một nhà quản lý bóng đá đích thực."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/realfootball2013_1786188781976.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Nhờ bản quyền chính thức từ FIFPro, Real Football 2013 mang lại trải nghiệm bóng đá sống động với hơn 240 đội bóng, hàng trăm cầu thủ đời thực cùng hệ thống sân vận động, giao diện menu và hiệu ứng hoạt ảnh được nâng cấp toàn diện."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_128x128_s40_1786186599268.jar",
+          "screen": "128x128",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_128x160_s40_1786186641502.jar",
+          "screen": "128x160",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_176x208_s40_1786186674437.jar",
+          "screen": "176x208",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_176x220_s40_1786186955882.jar",
+          "screen": "176x220",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_240x320_s40_1786186844584.jar",
+          "screen": "240x320",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_240x320_s60_1786187132794.jar",
+          "screen": "240x320",
+          "os": "s60"
+        },
+        {
+          "label": "Real Football 2015 TS",
+          "url": "assets/files/RealFootball2013TS_240x320_s40_1786187216177.jar",
+          "screen": "240x320",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_240x400_s40_1786186844584.jar",
+          "screen": "240x400",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_320x240_s40_1786187253449.jar",
+          "screen": "320x240",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2015",
+          "url": "assets/files/RealFootball2013_360x640_s40_1786187294760.jar",
+          "screen": "360x640",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
