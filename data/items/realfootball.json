@@ -3,7 +3,7 @@
   "title": "Real Football",
   "vendor": "GameLoft SA",
   "category": "gameloft",
-  "screen": "Multi screen",
+  "screen": "Multi Screen",
   "version": "1.0",
   "date": "7/8/2026",
   "blocks": [
@@ -35,15 +35,15 @@
       "groupTitle": "Real Football 2012",
       "files": [
         {
-          "label": "Real Football 2012 240x320",
+          "label": "Real Football 2012",
           "url": "assets/files/realfootball2012_240x320_s40.jar",
-          "screen": "Multi",
+          "screen": "240x320",
           "os": "s40"
         },
         {
-          "label": "Real Football 2012 320x240",
+          "label": "Real Football 2012",
           "url": "assets/files/realfootball2012_320x240_s40.jar",
-          "screen": "Multi",
+          "screen": "320x240",
           "os": "s40"
         }
       ]
