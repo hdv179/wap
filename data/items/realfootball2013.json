@@ -87,6 +87,12 @@
         },
         {
           "label": "Real Football 2013",
+          "url": "assets/files/RealFootball2013_240x400_s40_1786186844584.jar",
+          "screen": "240x400",
+          "os": "s40"
+        },
+        {
+          "label": "Real Football 2013",
           "url": "assets/files/RealFootball2013_320x240_s40_1786187253449.jar",
           "screen": "320x240",
           "os": "s40"
