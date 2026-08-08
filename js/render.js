@@ -144,28 +144,30 @@ function renderDetailPage(id) {
         }
         html += '</div>';
 
-        if (item.downloads) {
-            for (var j = 0; j < item.downloads.length; j++) {
-                var group = item.downloads[j];
-                html += '<div class="title-head">' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div><div class="wap-card wap-card--downloads">';
-                for (var k = 0; k < group.files.length; k++) {
-                    var fileItem = group.files[k];
-                    var fileUrl = escapeHtml(fileItem.url || '#');
-                    var fileLabel = escapeHtml(fileItem.label || 'Tải về');
-                    var fileScreen = escapeHtml(fileItem.screen || item.screen || 'Tất cả');
-                    var fileOs = escapeHtml(fileItem.os || detectOsFromUrl(fileUrl, fileLabel));
-
-                    html += '<div class="download-item">' +
-                        '<a href="' + fileUrl + '" class="btn-download" download>' + fileLabel + '</a>' +
-                        '<div class="download-info">' +
-                        '<span class="download-os"><b>HĐH:</b> ' + fileOs + '</span> | ' +
-                        '<span class="download-screen"><b>Màn hình:</b> ' + fileScreen + '</span>' +
-                        '</div>' +
-                        '</div>';
-                }
-                html += '</div>';
-            }
-        }
-        detailContainer.innerHTML = html;
+      if (item.downloads) {
+          for (var j = 0; j < item.downloads.length; j++) {
+              var group = item.downloads[j];
+              html += '<div class="title-head">' + escapeHtml((group.groupTitle || '').toUpperCase()) + '</div>' +
+                      '<div class="wap-card wap-card--downloads">';
+      
+              for (var k = 0; k < group.files.length; k++) {
+                  var fileItem = group.files[k];
+                  var fileUrl = escapeHtml(fileItem.url || '#');
+                  var fileLabel = escapeHtml(fileItem.label || 'Tải về');
+                  var fileScreen = escapeHtml(fileItem.screen || item.screen || 'Tất cả');
+                  var fileOs = escapeHtml(fileItem.os || detectOsFromUrl(fileUrl, fileLabel));
+      
+                  html += '<div class="download-item">' +
+                              '<a href="' + fileUrl + '" class="btn-download" download>' +
+                                  '<span class="download-title">' + fileLabel + '</span> ' +
+                                  '<span class="download-tag">[' + fileScreen + ']</span>' +
+                                  '<span class="download-tag">[' + fileOs + ']</span>' +
+                              '</a>' +
+                          '</div>';
+              }
+              html += '</div>';
+          }
+      }
+      detailContainer.innerHTML = html;
     });
 }
