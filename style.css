@@ -53,7 +53,7 @@ a:hover { text-decoration: underline; }
 .wap-card__news-link { font-weight: bold; }
 
 /* ==========================================================================
-   5. DETAIL PAGES & SEARCH SUMMARY
+   5. DETAIL PAGES & DOWNLOAD LIST
    ========================================================================== */
 .search-result-summary { font-size: 10px; padding: 3px; color: #555555; }
 .detail-meta { font-size: 10px; margin-bottom: 5px; border-bottom: 1px dashed #cccccc; padding-bottom: 3px; }
@@ -61,6 +61,15 @@ a:hover { text-decoration: underline; }
 .detail-image-wrap { text-align: center; margin: 6px 0; }
 .detail-image { max-width: 100%; border: 1px solid #cccccc; }
 .detail-image-caption { font-size: 9px; }
+
+/* Download Section Custom UI */
+.wap-card--downloads { padding: 3px 5px; }
+.download-item { margin-bottom: 4px; border-bottom: 1px dashed #e0e0e0; padding-bottom: 3px; }
+.download-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+.btn-download { display: block; width: 100%; padding: 2px 0; color: #008000 !important; font-weight: normal; text-align: left; text-decoration: none; word-wrap: break-word; }
+.btn-download:hover { text-decoration: underline; }
+.download-title { font-weight: bold; }
+.download-tag { color: #d9534f; font-size: 11px; margin-left: 2px; font-weight: normal; }
 
 /* ==========================================================================
    6. FORMS, INPUTS & UPLOAD UI
@@ -86,8 +95,6 @@ a:hover { text-decoration: underline; }
 .btn-upload { background-color: #28a745; border-color: #1e7e34; }
 .btn-block { display: block; width: 100%; }
 .btn--small { padding: 2px 8px; }
-.btn-download { display: block; width: 100%; padding: 3px 2px; margin: 2px 0; color: #008000 !important; font-weight: bold; text-align: left; text-decoration: none; }
-.btn-download:hover { text-decoration: underline; }
 
 /* ==========================================================================
    8. STATUS MESSAGES (THÔNG BÁO)
@@ -97,23 +104,29 @@ a:hover { text-decoration: underline; }
 .status-msg.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
 /* ==========================================================================
-   9. THEMING BACKWARD-COMPATIBLE (GHI ĐÈ THEME BẰNG MÃ MÀU TRỰC TIẾP)
+   9. THEMING BACKWARD-COMPATIBLE (MÀU SẮC THEME KHÁC NHAU)
    ========================================================================== */
+/* BLUE THEME */
 [data-theme="blue"] .title-head, [data-theme="blue"] .btn { background-color: #0066cc; border-color: #004499; }
 [data-theme="blue"] .wap-card__title, [data-theme="blue"] .btn-download { color: #0066cc !important; }
+[data-theme="blue"] .download-tag { color: #d9534f; }
 
+/* RED THEME */
 [data-theme="red"] .title-head, [data-theme="red"] .btn { background-color: #cc0000; border-color: #990000; }
 [data-theme="red"] .wap-card__title, [data-theme="red"] .btn-download { color: #cc0000 !important; }
+[data-theme="red"] .download-tag { color: #0066cc; }
 
-/* DARK THEME FIXES */
+/* DARK THEME */
 [data-theme="dark"], 
 [data-theme="dark"] body { background-color: #121212; color: #e0e0e0; border-color: #333333; }
 [data-theme="dark"] .wap-card, 
 [data-theme="dark"] .nav-menu,
 [data-theme="dark"] .footer { background-color: #1e1e1e; border-color: #333333; color: #e0e0e0; }
+[data-theme="dark"] .download-item { border-bottom-color: #333333; }
 [data-theme="dark"] .title-head { background-color: #2e7d32; border-color: #1b5e20; color: #ffffff; }
 [data-theme="dark"] .wap-card__title, 
-[data-theme="dark"] .btn-download { color: #81c784 !important; } /* Chuyển sang xanh lá sáng để nổi bật trên nền tối */
+[data-theme="dark"] .btn-download { color: #81c784 !important; } /* Xanh lá sáng nổi bật trên nền tối */
+[data-theme="dark"] .download-tag { color: #ff8a80; } /* Màu hồng/đỏ nhạt nổi bật trên Dark Mode */
 [data-theme="dark"] a { color: #64b5f6; }
 [data-theme="dark"] .wap-card__meta { color: #aaaaaa; opacity: 1; }
 [data-theme="dark"] .form-control { background-color: #2a2a2a; color: #ffffff; border-color: #444444; }
