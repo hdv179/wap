@@ -1,0 +1,52 @@
+{
+  "id": "artofwar",
+  "title": "Art Of War",
+  "vendor": "Gear Game",
+  "category": "gameoffline",
+  "screen": "240x320",
+  "version": "1.0",
+  "date": "9/8/2026",
+  "blocks": [
+    {
+      "type": "text",
+      "value": "Được coi là 1 trong các game RTS có đồ hoạ đẹp, gameplay cực kì chi tiết và thành công nhất trên Java, chắc khẳn rất nhiều độc giả của AowVN vẫn còn nhớ những ngày tháng tươi đẹp đó , khi mà Art Of War 2 từng thống trị trên điện thoại Nokia, những ngày tháng rủ nhau solo qua Bluetooth như chơi đế chế lan ngoài net vậy ."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/artofwar_1786251849334.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Đến bây giờ mình vẫn có thể khẳng định Art Of War 2 vẫn là dòng game RTS thành công nhất trên Java , nó tổng hợp hài hoà giữa gameplay và hệ thống unit quân , không quá khó , không quá dễ , điều này làm cho AOW nhanh chóng tiếp cận với đa số người dùng , và sinh ra rất nhiều chiến thuật hay ho và căng não."
+    },
+    {
+      "type": "image",
+      "value": "assets/images/artofwar_1786251860806.png",
+      "caption": ""
+    },
+    {
+      "type": "text",
+      "value": "Nội dung tương đối đơn giản , 1 bên là liên đoàn toàn cầu , hiện đang nắm quyền thống trị thế giới , với hoả lực cực kì khủng khiếp , tầm xa nhưng lại thiếu cơ động , một bên là phiến quân kháng chiến , với hoả lực tuy kém hơn , nhưng lại áp đảo về tính cơ động , số lượng và khả năng sản xuất trong thời gian ngắn . Nhiệm vụ của bạn là dẫn dắt phe của mình tiến tới chiến thắng , đ à n  á p quân kháng chiến hay chống lại thành công liên đoàn tàn ác , đều tuỳ thuộc vào bạn."
+    }
+  ],
+  "downloads": [
+    {
+      "groupTitle": "TẢI VỀ",
+      "files": [
+        {
+          "label": "Art Of War 2 - Liberation Of Peru",
+          "url": "assets/files/ArtOfWar2-LiberationOfPeru_240x320_s40_1786251768157.jar",
+          "screen": "240x320",
+          "os": "s40"
+        },
+        {
+          "label": "Art Of War 2 - Global Confederation",
+          "url": "assets/files/ArtOfWar2-GlobalConfederation_240x320_s40_1786251827834.Jar",
+          "screen": "240x320",
+          "os": "s40"
+        }
+      ]
+    }
+  ]
+}
